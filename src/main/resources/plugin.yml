@@ -1,0 +1,5 @@
+name: snip
+main: net.cosban.snip.Snip
+version: build-number
+author: cosban
+#website: http://cosban.net
