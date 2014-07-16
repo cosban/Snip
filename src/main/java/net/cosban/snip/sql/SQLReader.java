@@ -50,49 +50,70 @@ public class SQLReader {
 	}
 
 	public ArrayList<Ban> queryBans(ProxiedPlayer p) {
-		return bansToList(runQuery("SELECT timestamp, creator, lifetime, reason FROM `"
+		return runBanQuery("SELECT timestamp, creator, lifetime, reason FROM `"
 				+ bansTable
-				+ "` WHERE playerid="
+				+ "` WHERE (playerid='"
 				+ p.getUniqueId()
-				+ ";"));
+				+ "');");
+	}
+
+	public ArrayList<Ban> queryAddressBans(String ip) {
+		return runBanQuery("SELECT timestamp, creator, lifetime, reason FROM `"
+				+ bansTable
+				+ "` WHERE (ip='"
+				+ ip
+				+ "');");
 	}
 
 	public boolean queryBanState(ProxiedPlayer p) {
-		return isBanned(runQuery("SELECT banned FROM `"
+		return isBanned(runBanQuery("SELECT banned FROM `"
 				+ bansTable
-				+ "` WHERE playerid="
+				+ "` WHERE (playerid='"
 				+ p.getUniqueId().toString()
-				+ ";"));
+				+ "');"));
 	}
 
 	public boolean queryBanState(InetAddress address) {
-		return isBanned(runQuery("SELECT banned FROM `" + bansTable + "` WHERE ip=" + address.getHostAddress() + ";"));
+		return isBanned(runBanQuery("SELECT banned FROM `"
+				+ bansTable
+				+ "` WHERE (ip='"
+				+ address.getHostAddress()
+				+ "');"));
 	}
 
 	public boolean queryBanState(UUID uuid) {
-		return isBanned(runQuery("SELECT banned FROM `" + bansTable + "` WHERE playerid=" + uuid.toString() + ";"));
+		return isBanned(runBanQuery("SELECT banned FROM `"
+				+ bansTable
+				+ "` WHERE (playerid='"
+				+ uuid.toString()
+				+ "');"));
 	}
 
 	public long queryBanLifetime(ProxiedPlayer p) {
-		return getLifeTime(runQuery("SELECT timestamp, lifetime, banned FROM `"
+		return getLifeTime(runBanQuery("SELECT timestamp, lifetime, banned FROM `"
 				+ bansTable
-				+ "` WHERE playerid="
-				+ p.getUniqueId().toString()));
+				+ "` WHERE (playerid='"
+				+ p.getUniqueId().toString()
+				+ "');"));
 	}
 
-	public ResultSet queryKicks(ProxiedPlayer p) {
-		return runQuery("SELECT timestamp, creator, reason FROM `"
-				+ kicksTable
-				+ "` WHERE playerid="
-				+ p.getUniqueId().toString());
-	}
+	// TODO: not needed but very helpful
+	// public ResultSet queryKicks(ProxiedPlayer p) {
+	// return runQuery("SELECT timestamp, creator, reason FROM `"
+	// + kicksTable
+	// + "` WHERE (playerid='"
+	// + p.getUniqueId().toString()
+	// + "');");
+	// }
 
-	public ResultSet runQuery(String query) {
+	public ArrayList<Ban> runBanQuery(String query) {
 		final Connection c = plugin.getConnection();
-		Statement state;
 		try {
-			state = c.createStatement();
-			return state.executeQuery(query);
+			Statement state = c.createStatement();
+			ArrayList<Ban> bans = bansToList(state.executeQuery(query));
+			state.close();
+			c.close();
+			return bans;
 		} catch (SQLException e) {
 			Snip.debug().debug(getClass(), e);
 			return null;
@@ -116,31 +137,19 @@ public class SQLReader {
 		}
 	}
 
-	private boolean isBanned(ResultSet rs) {
-		try {
-			while (rs.next()) {
-				if (rs.getBoolean("banned")) {
-					return true;
-				}
-			}
-			return false;
-		} catch (SQLException e) {
-			Snip.debug().debug(getClass(), e);
-			return false;
+	private boolean isBanned(ArrayList<Ban> bans) {
+		for (Ban b : bans) {
+			if (b.isBanned()) return true;
 		}
+		return false;
 	}
 
-	private long getLifeTime(ResultSet rs) {
-		try {
-			while (rs.next()) {
-				if (rs.getBoolean("banned")) {
-					return rs.getLong("lifetime");
-				}
+	private long getLifeTime(ArrayList<Ban> bans) {
+		for (Ban b : bans) {
+			if (b.isBanned()) {
+				return b.getRemainingBanTime();
 			}
-			return 0L;
-		} catch (SQLException e) {
-			Snip.debug().debug(getClass(), e);
-			return 0L;
 		}
+		return 0L;
 	}
 }

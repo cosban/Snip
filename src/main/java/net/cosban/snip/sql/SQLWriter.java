@@ -39,7 +39,7 @@ public class SQLWriter extends TimerTask {
 			verifyTable(dbm, state, prefix + "bans", "(uid INT UNSIGNED AUTO_INCREMENT NOT NULL,"
 					+ " timestamp DATETIME NOT NULL,"
 					+ " playername varchar(32) NOT NULL,"
-					+ " playerid varchar(32) NOT NULL,"
+					+ " playerid varchar(36) NOT NULL,"
 					+ " ip varchar(255) NOT NULL,"
 					+ " creator varchar(32) NOT NULL,"
 					+ " bantype varchar(15) NOT NULL,"
@@ -52,7 +52,7 @@ public class SQLWriter extends TimerTask {
 			verifyTable(dbm, state, prefix + "kicks", "(uid INT UNSIGNED AUTO_INCREMENT NOT NULL,"
 					+ " timeStamp DATETIME NOT NULL,"
 					+ " playername varchar(32) NOT NULL,"
-					+ " playerid varchar(32) NOT NULL,"
+					+ " playerid varchar(36) NOT NULL,"
 					+ " creator varchar(32) NOT NULL,"
 					+ " reason varchar(255) NOT NULL,"
 					+ " PRIMARY KEY (uid))");

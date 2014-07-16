@@ -59,6 +59,7 @@ public class SQLConnectionPool implements Closeable {
 			connections.remove(c);
 			c.terminate();
 		}
+		lock.unlock();
 	}
 
 	public Connection getConnection() throws SQLException {
@@ -68,7 +69,9 @@ public class SQLConnectionPool implements Closeable {
 			while (iter.hasNext()) {
 				final IConnection conn = iter.next();
 				if (conn.lease()) {
-					if (conn.isValid()) return conn;
+					if (conn.isValid()) {
+						return conn;
+					}
 					connections.remove(conn);
 					conn.terminate();
 				}
@@ -92,7 +95,9 @@ public class SQLConnectionPool implements Closeable {
 		final Iterator<IConnection> conns = connections.iterator();
 		while (conns.hasNext()) {
 			final IConnection c = conns.next();
-			if (c.isInUse() && stale > c.getLastUsage() && !c.isValid()) conns.remove();
+			if (c.isInUse() && stale > c.getLastUsage() && !c.isValid()) {
+				conns.remove();
+			}
 		}
 		lock.unlock();
 	}
@@ -116,7 +121,6 @@ public class SQLConnectionPool implements Closeable {
 		private long				lastUsage;
 		private int					endLife;
 
-		@SuppressWarnings("unused")
 		private String				schema;
 
 		IConnection(Connection c) {
@@ -242,7 +246,7 @@ public class SQLConnectionPool implements Closeable {
 
 		@Override
 		public String getSchema() throws SQLException {
-			return c.getSchema();
+			return schema;
 		}
 
 		@Override
@@ -423,7 +427,9 @@ public class SQLConnectionPool implements Closeable {
 		}
 
 		synchronized boolean lease() {
-			if (isInUse) return false;
+			if (isInUse) {
+				return false;
+			}
 			isInUse = true;
 			lastUsage = System.currentTimeMillis();
 			return true;

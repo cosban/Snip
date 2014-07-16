@@ -84,6 +84,7 @@ public class Snip extends Plugin {
 	}
 
 	public void onDisable() {
+		ProxyServer.getInstance().getScheduler().cancel(this);
 		pool.close();
 	}
 
@@ -106,9 +107,11 @@ public class Snip extends Plugin {
 		} catch (final Exception e) {
 			if (connected) {
 				debug.debug(getClass(), "SQL connection error");
-				debug.debug(getClass(), e);
 				connected = false;
-			} else debug.debug(getClass(), "SQL connection lost");
+			} else {
+				debug.debug(getClass(), "SQL connection lost");
+			}
+			debug.debug(getClass(), e);
 			return null;
 		}
 	}

@@ -1,6 +1,7 @@
 package net.cosban.snip.api;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -423,9 +424,8 @@ public class SnipAPI {
 	 * 
 	 * @return A set of all matches.
 	 */
-	public static Set<String> keys(String pattern) {
-		// return jedis.keys(pattern);
-		return null;
+	public static ArrayList<Ban> bannedIPs(String ip) {
+		return reader.queryAddressBans(ip);
 	}
 
 	/**
