@@ -26,8 +26,11 @@ public class Debugger {
 					+ c.getName()
 					+ "] Please report the following issue if it breaks functionality of the plugin");
 			log.warning("[" + c.getName() + "] - DEBUGGING EXCEPTION BEGIN -");
-			e.printStackTrace();
-			log.warning("[" + c.getName() + "] - DEBUGGING EXCEPTION END-");
+			log.warning(e.getMessage());
+			for (StackTraceElement s : e.getStackTrace()) {
+				log.warning("   " + s.toString());
+			}
+			log.warning("[" + c.getName() + "] - DEBUGGING EXCEPTION END -");
 		}
 	}
 }

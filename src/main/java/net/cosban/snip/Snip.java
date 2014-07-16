@@ -30,7 +30,6 @@ public class Snip extends Plugin {
 	private static SQLReader	reader;
 	private static SQLWriter	writer;
 	private boolean				connected;
-	private boolean				useFlat	= false;
 	private SQLConnectionPool	pool;
 
 	protected static Logger		logger;
@@ -42,18 +41,21 @@ public class Snip extends Plugin {
 		debug.setLogger(getLogger());
 		logger = getLogger();
 
-		getProxy().getPluginManager().registerCommand(this, new BanCommand("ban", "snip.ban", new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new UnbanCommand("unban", "snip.unban", new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new Ban_IPCommand("ban-ip", "snip.banip",
-				new String[] { "banip", "ipban", "ip-ban" }));
-		getProxy().getPluginManager().registerCommand(this, new Unban_IPCommand("unban-ip", "snip.unbanip",
-				new String[] { "unbanip", "ipunban", "ip-unban" }));
-		getProxy().getPluginManager().registerCommand(this, new LookupCommand("lookup", "snip.lookup", new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new ListBansCommand("listbans", "snip.listbans",
+		getProxy().getPluginManager().registerCommand(this, new BanCommand(this, "ban", "snip.ban", new String[] {}));
+		getProxy().getPluginManager().registerCommand(this, new UnbanCommand(this, "unban", "snip.unban",
 				new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new TempBanCommand("tempban", "snip.ban", new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new KickCommand("kick", "snip.kick", new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new SnipCommand("snip", "snip.snip",
+		getProxy().getPluginManager().registerCommand(this, new Ban_IPCommand(this, "ban-ip", "snip.banip",
+				new String[] { "banip", "ipban", "ip-ban" }));
+		getProxy().getPluginManager().registerCommand(this, new Unban_IPCommand(this, "unban-ip", "snip.unbanip",
+				new String[] { "unbanip", "ipunban", "ip-unban" }));
+		getProxy().getPluginManager().registerCommand(this, new LookupCommand(this, "lookup", "snip.lookup",
+				new String[] {}));
+		getProxy().getPluginManager().registerCommand(this, new ListBansCommand(this, "listbans", "snip.listbans",
+				new String[] {}));
+		getProxy().getPluginManager().registerCommand(this, new TempBanCommand(this, "tempban", "snip.ban",
+				new String[] {}));
+		getProxy().getPluginManager().registerCommand(this, new KickCommand(this, "kick", "snip.kick", new String[] {}));
+		getProxy().getPluginManager().registerCommand(this, new SnipCommand(this, "snip", "snip.snip",
 				new String[] { "forbiddance" }));
 		getProxy().getPluginManager().registerListener(this, new FEventHandler());
 		getProxy().getPluginManager().registerListener(this, new PlayerConnectionHandler());
@@ -63,7 +65,7 @@ public class Snip extends Plugin {
 			pool = new SQLConnectionPool(getConfig().getURL(), getConfig().getUsername(), getConfig().getPassword());
 			Connection c = getConnection();
 			if (c == null) {
-				useFlat = true;
+				connected = false;
 			} else {
 				debug.debug(getClass(), "Connected to MySQL database.");
 			}
@@ -71,13 +73,13 @@ public class Snip extends Plugin {
 			reader = SQLReader.getManager(this);
 			writer = SQLWriter.getManager(this);
 		} catch (ClassNotFoundException e) {
-			useFlat = true;
+			connected = false;
 			debug.debug(getClass(), e);
 		}
 
-		if (useFlat) {
+		if (!connected) {
 			logger.warning("There was an issue connecting to the MySQL server.");
-			logger.warning("Reverting to flat format but it is HIGHLY encouraged that you fix your DB");
+			logger.warning("It is HIGHLY encouraged that you fix your database connection");
 		}
 	}
 
@@ -87,6 +89,10 @@ public class Snip extends Plugin {
 
 	public FileManager getFiles() {
 		return files;
+	}
+
+	public boolean isConnected() {
+		return connected;
 	}
 
 	public Connection getConnection() {

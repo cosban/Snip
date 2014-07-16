@@ -503,8 +503,9 @@ public class SnipAPI {
 	 *        The player to kick.
 	 */
 	public static void kickPlayer(ProxiedPlayer player, CommandSender sender) {
-		ProxyServer.getInstance().getPluginManager().callEvent(new KickEvent(player, sender, "Kicked."));
+		ProxyServer.getInstance().getPluginManager().callEvent(new KickEvent(player, sender, "Kicked by: "
+				+ sender.getName()));
 		logger.info("[KICK] " + player.getName() + " - Invoker: " + sender.getName());
-		player.disconnect(new TextComponent("Kicked."));
+		player.disconnect(new TextComponent("Kicked by: " + sender.getName()));
 	}
 }

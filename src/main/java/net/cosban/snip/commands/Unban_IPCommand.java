@@ -1,5 +1,6 @@
 package net.cosban.snip.commands;
 
+import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -8,8 +9,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class Unban_IPCommand extends SnipCommand {
 
-	public Unban_IPCommand(String name, String permission, String[] aliases) {
-		super(name, permission, aliases);
+	public Unban_IPCommand(Snip instance, String name, String permission, String[] aliases) {
+		super(instance, name, permission, aliases);
 	}
 
 	public void execute(CommandSender sender, String[] args) {

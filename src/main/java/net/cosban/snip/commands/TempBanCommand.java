@@ -1,5 +1,6 @@
 package net.cosban.snip.commands;
 
+import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
 import net.cosban.snip.api.Util;
 import net.cosban.utils.TimeUtils;
@@ -11,8 +12,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class TempBanCommand extends SnipCommand {
 
-	public TempBanCommand(String name, String permission, String[] aliases) {
-		super(name, permission, aliases);
+	public TempBanCommand(Snip instance, String name, String permission, String[] aliases) {
+		super(instance, name, permission, aliases);
 	}
 
 	public void execute(CommandSender sender, String[] args) {

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
 import net.cosban.utils.TimeUtils;
 import net.md_5.bungee.api.ChatColor;
@@ -16,8 +17,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class ListBansCommand extends SnipCommand {
 
-	public ListBansCommand(String name, String permission, String[] aliases) {
-		super(name, permission, aliases);
+	public ListBansCommand(Snip instance, String name, String permission, String[] aliases) {
+		super(instance, name, permission, aliases);
 	}
 
 	public void execute(CommandSender sender, String[] args) {

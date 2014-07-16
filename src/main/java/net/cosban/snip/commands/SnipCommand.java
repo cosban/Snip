@@ -10,8 +10,11 @@ import net.md_5.bungee.api.plugin.Command;
 
 public class SnipCommand extends Command {
 
-	public SnipCommand(String name, String permission, String[] aliases) {
+	private Snip	plugin;
+
+	public SnipCommand(Snip instance, String name, String permission, String[] aliases) {
 		super(name, permission, aliases);
+		plugin = instance;
 	}
 
 	public void execute(CommandSender sender, String[] args) {
@@ -44,15 +47,10 @@ public class SnipCommand extends Command {
 	}
 
 	public void status(CommandSender sender) {
-		// TODO: display whether we're in sql or flat mode
-		// if (jedis.isConnected()) {
-		// sender.sendMessage(new TextComponent(ChatColor.GREEN +
-		// "Database is connected!"));
-		// return;
-		// } else if (!jedis.isConnected()) {
-		// sender.sendMessage(new TextComponent(ChatColor.GREEN +
-		// "Database is connected!"));
-		return;
+		sender.sendMessage(new TextComponent(ChatColor.GREEN
+				+ "Snip is currently using "
+				+ (plugin.isConnected() ? "MySQL" : "a flat file")
+				+ " to store bans."));
 	}
 
 	private void info(CommandSender sender) {
