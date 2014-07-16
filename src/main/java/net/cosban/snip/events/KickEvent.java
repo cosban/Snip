@@ -3,7 +3,7 @@ package net.cosban.snip.events;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class KickEvent extends ForbiddanceEvent {
+public class KickEvent extends SnipEvent {
 	private ProxiedPlayer	player;
 	private CommandSender	invoker;
 	private String			reason;

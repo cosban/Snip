@@ -54,7 +54,7 @@ public class TempBanCommand extends SnipCommand {
 					message += args[i] + " ";
 				message = message.trim();
 				if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
-					SnipAPI.tempban(player, message, Util.parseTimeSpec(args[1]) * 60, sender);
+					SnipAPI.tempban(player, message, Util.parseTimeSpec(args[1]) * 60, sender.getName());
 					SnipAPI.kickPlayer(player, "Temp Banned: \""
 							+ message
 							+ "\" R: "

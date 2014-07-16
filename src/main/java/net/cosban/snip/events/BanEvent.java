@@ -1,9 +1,9 @@
 package net.cosban.snip.events;
 
-import net.cosban.snip.api.BanType;
+import net.cosban.snip.api.Ban.BanType;
 import net.md_5.bungee.api.CommandSender;
 
-public class BanEvent extends ForbiddanceEvent {
+public class BanEvent extends SnipEvent {
 	private String			name;
 	private CommandSender	invoker;
 	private String			reason;

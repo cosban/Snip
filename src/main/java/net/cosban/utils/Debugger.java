@@ -10,7 +10,10 @@ public class Debugger {
 	public Debugger(String name, boolean enabled) {
 		log = Logger.getLogger(name);
 		this.enabled = enabled;
-		if (enabled) debug(getClass(), "DEBUG IS ENABLED AND MAY CAUSE EXCESSIVE OUTPUT TO YOUR CONSOLE");
+	}
+
+	public void setLogger(Logger log) {
+		Debugger.log = log;
 	}
 
 	public void debug(Class<?> c, String s) {

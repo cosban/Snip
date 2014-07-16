@@ -1,6 +1,6 @@
 package net.cosban.snip.events;
 
-import net.cosban.snip.api.BanType;
+import net.cosban.snip.api.Ban.BanType;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;

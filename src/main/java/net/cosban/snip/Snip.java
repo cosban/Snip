@@ -20,23 +20,26 @@ import net.cosban.snip.sql.SQLReader;
 import net.cosban.snip.sql.SQLWriter;
 import net.cosban.utils.Debugger;
 import net.cosban.utils.SQLConnectionPool;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 public class Snip extends Plugin {
-	private static String			version;
-	private static Debugger			debug;
-	private static FileManager		files;
+	private static String		version;
+	private static Debugger		debug;
+	private static FileManager	files;
 	private static SQLReader	reader;
 	private static SQLWriter	writer;
-	private boolean					connected;
-	private SQLConnectionPool		pool;
+	private boolean				connected;
+	private boolean				useFlat	= false;
+	private SQLConnectionPool	pool;
 
-	protected static Logger			logger;
+	protected static Logger		logger;
 
 	public void onEnable() {
 		version = getDescription().getVersion();
 		files = new FileManager(this);
 		debug = new Debugger(getClass().getName(), getConfig().toUseDebug());
+		debug.setLogger(getLogger());
 		logger = getLogger();
 
 		getProxy().getPluginManager().registerCommand(this, new BanCommand("ban", "snip.ban", new String[] {}));
@@ -55,28 +58,38 @@ public class Snip extends Plugin {
 		getProxy().getPluginManager().registerListener(this, new FEventHandler());
 		getProxy().getPluginManager().registerListener(this, new PlayerConnectionHandler());
 
-		logger.info("[Forbiddance] Connected to "
-				+ getConfig().getHostname()
-				+ " on server id "
-				+ String.valueOf(getConfig().getServerID())
-				+ "!");
-		debug.debug(getClass(), "Connecting to MySQL.");
-		pool = new SQLConnectionPool(getConfig().getURL(), getConfig().getUsername(), getConfig().getPassword());
-		reader = SQLReader.getManager(this);
-		writer = SQLWriter.getManager(this);
-		logger.info("[Forbiddance] Finished loading!");
+		debug.debug(getClass(), "Connecting to MySQL... " + getConfig().getUsername() + "@" + getConfig().getURL());
+		try {
+			pool = new SQLConnectionPool(getConfig().getURL(), getConfig().getUsername(), getConfig().getPassword());
+			Connection c = getConnection();
+			if (c == null) {
+				useFlat = true;
+			} else {
+				debug.debug(getClass(), "Connected to MySQL database.");
+			}
+			ProxyServer.getInstance().getScheduler().runAsync(this, pool.getCloser());
+			reader = SQLReader.getManager(this);
+			writer = SQLWriter.getManager(this);
+		} catch (ClassNotFoundException e) {
+			useFlat = true;
+			debug.debug(getClass(), e);
+		}
 
+		if (useFlat) {
+			logger.warning("There was an issue connecting to the MySQL server.");
+			logger.warning("Reverting to flat format but it is HIGHLY encouraged that you fix your DB");
+		}
 	}
 
 	public void onDisable() {
-
+		pool.close();
 	}
 
 	public FileManager getFiles() {
 		return files;
 	}
 
-	public Connection Connection() {
+	public Connection getConnection() {
 		try {
 			final Connection c = pool.getConnection();
 			if (!connected) {

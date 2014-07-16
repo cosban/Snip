@@ -1,6 +1,7 @@
 package net.cosban.snip.sql;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 import net.cosban.snip.Snip;
 import net.cosban.snip.api.Ban;
+import net.cosban.snip.api.Ban.BanType;
 import net.cosban.snip.files.ConfigurationFile;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
@@ -48,12 +50,11 @@ public class SQLReader {
 	}
 
 	public ArrayList<Ban> queryBans(ProxiedPlayer p) {
-		return bansToList(p, runQuery("SELECT timestamp, creator, lifetime, reason FROM `"
+		return bansToList(runQuery("SELECT timestamp, creator, lifetime, reason FROM `"
 				+ bansTable
 				+ "` WHERE playerid="
 				+ p.getUniqueId()
 				+ ";"));
-
 	}
 
 	public boolean queryBanState(ProxiedPlayer p) {
@@ -87,7 +88,7 @@ public class SQLReader {
 	}
 
 	public ResultSet runQuery(String query) {
-		final Connection c = plugin.Connection();
+		final Connection c = plugin.getConnection();
 		Statement state;
 		try {
 			state = c.createStatement();
@@ -98,14 +99,18 @@ public class SQLReader {
 		}
 	}
 
-	private ArrayList<Ban> bansToList(ProxiedPlayer p, ResultSet rs) {
+	private ArrayList<Ban> bansToList(ResultSet rs) {
 		try {
 			ArrayList<Ban> bans = new ArrayList<>();
 			while (rs.next()) {
-				bans.add(new Ban(name, uuid, address, reason, type, creator, temporary, duration, timestamp, banned));
+				BanType t = BanType.valueOf(rs.getString("type"));
+				bans.add(new Ban(rs.getString("playername"), rs.getString("playerid"),
+						InetAddress.getByName(rs.getString("ip")), rs.getString("reason"), t, rs.getString("creator"),
+						t.equals(BanType.TEMPORARY), rs.getLong("lifetime"), rs.getLong("timestamp"),
+						rs.getBoolean("banned")));
 			}
 			return bans;
-		} catch (SQLException e) {
+		} catch (SQLException | UnknownHostException e) {
 			Snip.debug().debug(getClass(), e);
 			return null;
 		}

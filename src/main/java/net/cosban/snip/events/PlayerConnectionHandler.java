@@ -16,27 +16,26 @@ public class PlayerConnectionHandler implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerLogin(PostLoginEvent event) {
-		if (SnipAPI.isConnected()) {
-			if (SnipAPI.isbanned(event.getPlayer().getName())) {
-				if (!SnipAPI.isTemporary(event.getPlayer().getName())) {
-					event.getPlayer().disconnect(new TextComponent(
-							SnipAPI.getBanReason(event.getPlayer().getName()).isEmpty() ? "Banned!" : "Banned: "
-									+ SnipAPI.getBanReason(event.getPlayer().getName())));
-				} else {
-					event.getPlayer().disconnect(new TextComponent(
-							SnipAPI.getBanReason(event.getPlayer().getName()).isEmpty() ? "Banned! R: "
-									+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer().getName())) : "Temp Banned: "
-									+ SnipAPI.getBanReason(event.getPlayer().getName())
-									+ " R: "
-									+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer().getName()))));
-				}
-			} else if (isAddressBannedCIDR(event.getPlayer().getAddress().getAddress())) {
-				event.getPlayer().disconnect(new TextComponent("Banned!"));
-			} else if (SnipAPI.isbanned(event.getPlayer())) {
+		// TODO: if isn't connected to sql, revert to flatfile
+		if (SnipAPI.isbanned(event.getPlayer().getName())) {
+			if (!SnipAPI.isTemporary(event.getPlayer().getName())) {
 				event.getPlayer().disconnect(new TextComponent(
-						SnipAPI.getBanReason(event.getPlayer().getAddress().getHostName()).isEmpty() ? "Banned!" : "Banned: "
-								+ SnipAPI.getBanReason(event.getPlayer().getAddress().getHostName())));
+						SnipAPI.getBanReason(event.getPlayer().getName()).isEmpty() ? "Banned!" : "Banned: "
+								+ SnipAPI.getBanReason(event.getPlayer().getName())));
+			} else {
+				event.getPlayer().disconnect(new TextComponent(
+						SnipAPI.getBanReason(event.getPlayer().getName()).isEmpty() ? "Banned! R: "
+								+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer().getName())) : "Temp Banned: "
+								+ SnipAPI.getBanReason(event.getPlayer().getName())
+								+ " R: "
+								+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer().getName()))));
 			}
+		} else if (isAddressBannedCIDR(event.getPlayer().getAddress().getAddress())) {
+			event.getPlayer().disconnect(new TextComponent("Banned!"));
+		} else if (SnipAPI.isbanned(event.getPlayer())) {
+			event.getPlayer().disconnect(new TextComponent(
+					SnipAPI.getBanReason(event.getPlayer().getAddress().getHostName()).isEmpty() ? "Banned!" : "Banned: "
+							+ SnipAPI.getBanReason(event.getPlayer().getAddress().getHostName())));
 		}
 	}
 

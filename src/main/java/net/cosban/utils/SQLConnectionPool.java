@@ -33,16 +33,21 @@ public class SQLConnectionPool implements Closeable {
 	private final String			url, user, password;
 
 	private ArrayList<IConnection>	connections;
+	private CloserTask				closerTask;
 
 	private final Lock				lock		= new ReentrantLock();
 
-	public SQLConnectionPool(String url, String user, String password) {
+	public SQLConnectionPool(String url, String user, String password) throws ClassNotFoundException {
+		Class.forName("com.mysql.jdbc.Driver");
 		this.url = url;
 		this.user = user;
 		this.password = password;
 		connections = new ArrayList<IConnection>(poolSize);
-		CloserTask closerTask = new CloserTask();
-		new Thread(closerTask, "SQL Connection Closer").start();
+		closerTask = new CloserTask();
+	}
+
+	public CloserTask getCloser() {
+		return closerTask;
 	}
 
 	@Override

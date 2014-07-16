@@ -72,8 +72,8 @@
 								<includes>
 									<include>commons-net:commons-net</include>
 									<include>commons_validator:commons-validator</include>
-									<include>redis.clients:jedis</include>
 									<include>com.nikhaldimann:inieditor</include>
+									<include>mysql:mysql-connector-java</include>
 								</includes>
 							</artifactSet>
 						</configuration>

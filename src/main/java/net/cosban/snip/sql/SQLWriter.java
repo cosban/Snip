@@ -14,7 +14,6 @@ import net.cosban.snip.Snip;
 import net.cosban.snip.api.Ban;
 import net.cosban.snip.api.Ban.BanType;
 import net.cosban.snip.files.ConfigurationFile;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class SQLWriter extends TimerTask {
@@ -71,7 +70,7 @@ public class SQLWriter extends TimerTask {
 	@Override
 	public void run() {
 		if (queue.isEmpty() || !lock.tryLock()) return;
-		final Connection c = plugin.Connection();
+		final Connection c = plugin.getConnection();
 		Statement state = null;
 		if (queue.size() >= 10000) {
 			Snip.debug().debug(getClass(), "Queue overloaded. Size: " + queue.size());

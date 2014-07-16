@@ -1,5 +1,6 @@
 package net.cosban.snip.commands;
 
+import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
@@ -43,6 +44,7 @@ public class SnipCommand extends Command {
 	}
 
 	public void status(CommandSender sender) {
+		// TODO: display whether we're in sql or flat mode
 		// if (jedis.isConnected()) {
 		// sender.sendMessage(new TextComponent(ChatColor.GREEN +
 		// "Database is connected!"));
@@ -54,13 +56,7 @@ public class SnipCommand extends Command {
 	}
 
 	private void info(CommandSender sender) {
-		// if (jedis.isConnected()) {
-		// sender.sendMessage(new TextComponent(ChatColor.GREEN +
-		// jedis.info()));
-		// return;
-		// } else if (!jedis.isConnected()) {
-		// sender.sendMessage(new TextComponent(ChatColor.RED +
-		// "Database not connected!"));
+		sender.sendMessage(new TextComponent(ChatColor.GREEN + "Running Snip v" + Snip.getVersion()));
 		return;
 	}
 

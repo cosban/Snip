@@ -20,6 +20,7 @@ public class ConfigurationFile extends SnipFile {
 
 		}
 		if (!ini.hasSection("mysql")) {
+			ini.addSection("mysql");
 			ini.set("mysql", "hostname", "localhost");
 			ini.set("mysql", "port", "3306");
 			ini.set("mysql", "username", "root");
@@ -58,7 +59,13 @@ public class ConfigurationFile extends SnipFile {
 	}
 
 	public String getURL() {
-		return "jdbc:mysql://" + getHostname() + getPort() + getDatabase() + "?useUnicode=true&characterEncoding=utf-8";
+		return "jdbc:mysql://"
+				+ getHostname()
+				+ ":"
+				+ getPort()
+				+ "/"
+				+ getDatabase()
+				+ "?useUnicode=true&characterEncoding=utf-8";
 	}
 
 	public int getPort() {
