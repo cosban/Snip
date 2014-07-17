@@ -42,7 +42,7 @@ public class SQLReader {
 	public Ban queryLastBan(ProxiedPlayer p) {
 		Ban latest = null;
 		for (Ban b : queryBans(p)) {
-			if (latest == null || b.getBanTime() > latest.getBanTime()) {
+			if (latest == null || b.getBanCreationTime() > latest.getBanCreationTime()) {
 				latest = b;
 			}
 		}
@@ -63,6 +63,11 @@ public class SQLReader {
 				+ "` WHERE (playerid='"
 				+ p.getUniqueId().toString()
 				+ "');"));
+	}
+
+	public boolean queryBanState(String name) {
+		return isBanned(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playername='" + name + "');"));
+
 	}
 
 	public boolean queryBanState(InetAddress address) {

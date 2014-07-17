@@ -41,7 +41,7 @@ public class SnipAPI {
 	 * @return True if the player is banned
 	 */
 	public static boolean isbanned(String name) {
-		return isbanned(ProxyServer.getInstance().getPlayer(name));
+		return reader.queryBanState(name);
 	}
 
 	/**
@@ -155,21 +155,10 @@ public class SnipAPI {
 	 *        The player to unban.
 	 * @return True if the player was successfully unbanned.
 	 */
-	public static boolean unban(ProxiedPlayer player, CommandSender sender) {
-		ProxyServer.getInstance().getPluginManager().callEvent(new UnbanEvent(player.getName(), sender));
-		writer.queueUnban(player, sender.getName());
-		return false;
-	}
-
-	/**
-	 * Unban a player from the server (both permanent and temporary bans)
-	 * 
-	 * @param name
-	 *        The player to unban by name.
-	 * @return True if the player was successfully unbanned.
-	 */
 	public static boolean unban(String name, CommandSender sender) {
-		return unban(ProxyServer.getInstance().getPlayer(name), sender);
+		ProxyServer.getInstance().getPluginManager().callEvent(new UnbanEvent(name, sender));
+		writer.queueUnban(name, sender.getName());
+		return false;
 	}
 
 	/**

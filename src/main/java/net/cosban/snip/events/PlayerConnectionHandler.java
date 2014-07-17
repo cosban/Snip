@@ -19,7 +19,8 @@ public class PlayerConnectionHandler implements Listener {
 		if (SnipAPI.isbanned(event.getPlayer())) {
 			if (!SnipAPI.isTemporary(event.getPlayer())) {
 				event.getPlayer().disconnect(new TextComponent(
-						SnipAPI.getBanReason(event.getPlayer()).isEmpty() ? "Banned!" : "Banned: "
+						SnipAPI.getBanReason(event.getPlayer()).isEmpty() ? "Banned by: "
+								+ SnipAPI.getCreator(event.getPlayer()) : "Banned: "
 								+ SnipAPI.getBanReason(event.getPlayer())));
 			} else {
 				event.getPlayer().disconnect(new TextComponent(
