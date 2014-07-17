@@ -75,8 +75,8 @@ public class SQLWriter extends TimerTask {
 
 	public void queueBan(ProxiedPlayer recipient, String creator, String reason) {
 		queue.add(new BanInstanceRow(recipient.getName(), recipient.getUniqueId().toString(),
-				recipient.getAddress().getAddress(), reason, BanType.PERMANENT, creator, false, -1L,
-				System.currentTimeMillis(), false));
+				recipient.getAddress().getAddress(), reason, BanType.PERMANENT, creator, 0L,
+				System.currentTimeMillis() / 1000, true));
 	}
 
 	public void queueBan(InetAddress address, String reason, String sender) {
@@ -85,8 +85,8 @@ public class SQLWriter extends TimerTask {
 
 	public void queueTempBan(ProxiedPlayer recipient, String creator, long lifetime, String reason) {
 		queue.add(new BanInstanceRow(recipient.getName(), recipient.getUniqueId().toString(),
-				recipient.getAddress().getAddress(), reason, BanType.TEMPORARY, creator, true, lifetime,
-				System.currentTimeMillis(), true));
+				recipient.getAddress().getAddress(), reason, BanType.TEMPORARY, creator, lifetime,
+				System.currentTimeMillis() / 1000, true));
 	}
 
 	public void queueUnban(ProxiedPlayer recipient, String creator) {
@@ -120,6 +120,7 @@ public class SQLWriter extends TimerTask {
 				if (r == null) continue;
 				try {
 					if (r.toInsert()) {
+						Snip.debug().debug(getClass(), r.getInsertStatement());
 						state.execute(r.getInsertStatement());
 					} else {
 						state.execute(r.getUpdateStatement());
@@ -132,7 +133,19 @@ public class SQLWriter extends TimerTask {
 			c.commit();
 		} catch (final SQLException e) {
 			Snip.debug().debug(getClass(), e);
-		} finally {}
+		} finally {
+			try {
+				if (state != null) {
+					state.close();
+				}
+				if (c != null) {
+					c.close();
+				}
+			} catch (final SQLException e) {
+				Snip.debug().debug(getClass(), e);
+			}
+			lock.unlock();
+		}
 	}
 
 	private void verifyTable(DatabaseMetaData dbm, Statement state, String table, String query) throws SQLException {
@@ -162,13 +175,13 @@ public class SQLWriter extends TimerTask {
 		}
 
 		public BanInstanceRow(String player, String uuid, InetAddress address, String reason, BanType type,
-				String creator, boolean temporary, long bantime, long creationtime, boolean banned) {
-			super(player, uuid, address, reason, type, creator, temporary, bantime, creationtime, banned);
+				String creator, long bantime, long creationtime, boolean banned) {
+			super(player, uuid, address, reason, type, creator, bantime, creationtime, banned);
 			this.toInsert = true;
 		}
 
 		public BanInstanceRow(String player, String uuid, InetAddress address, String creator, boolean banned) {
-			super(player, uuid, address, "", BanType.UNBAN, creator, false, -1L, 0, banned);
+			super(player, uuid, address, "", BanType.UNBAN, creator, 0L, 0, banned);
 			this.toInsert = false;
 		}
 
@@ -179,30 +192,30 @@ public class SQLWriter extends TimerTask {
 		public String getInsertStatement() {
 			return "INSERT INTO `"
 					+ table
-					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned, updates) VALUES ("
+					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned, updates) VALUES (FROM_UNIXTIME("
 					+ this.getBanCreationTime()
-					+ ", "
+					+ "), '"
 					+ this.getPlayerName()
-					+ ", "
+					+ "', '"
 					+ this.getUUID()
-					+ ", "
-					+ this.getAddress()
-					+ ", "
+					+ "', '"
+					+ this.getAddress().getHostAddress()
+					+ "', '"
 					+ this.getCreator()
-					+ ", "
+					+ "', '"
 					+ this.getType()
-					+ ", "
+					+ "', "
 					+ this.getBanTime()
-					+ ", `"
+					+ ", '"
 					+ this.getReason()
-					+ "`, "
+					+ "', "
 					+ this.isBanned()
 					+ ", 0);";
 		}
 
 		@Override
 		public String getUpdateStatement() {
-			return "UPDATE `" + table + "` SET banned =" + isBanned() + " WHERE playerid=" + getUUID() + ";";
+			return "UPDATE `" + table + "` SET banned =" + isBanned() + " WHERE playerid='" + getUUID() + "';";
 		}
 
 		@Override
@@ -226,15 +239,15 @@ public class SQLWriter extends TimerTask {
 		public String getInsertStatement() {
 			return "INSERT INTO `"
 					+ table
-					+ "` (timeStamp, playerid, creator, reason) VALUES ("
+					+ "` (timeStamp, playerid, creator, reason) VALUES (FROM_UNIXTIME("
 					+ System.currentTimeMillis()
-					+ ", "
+					+ "), "
 					+ recipient.getUniqueId()
 					+ ", "
 					+ creator.getName()
-					+ ", `"
+					+ ", "
 					+ reason
-					+ "`);";
+					+ ");";
 		}
 
 		@Override

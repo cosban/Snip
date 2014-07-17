@@ -17,17 +17,17 @@ public class PlayerConnectionHandler implements Listener {
 	public void onPlayerLogin(PostLoginEvent event) {
 		// TODO: if isn't connected to sql, revert to flatfile
 		if (SnipAPI.isbanned(event.getPlayer())) {
-			if (!SnipAPI.isTemporary(event.getPlayer().getName())) {
+			if (!SnipAPI.isTemporary(event.getPlayer())) {
 				event.getPlayer().disconnect(new TextComponent(
-						SnipAPI.getBanReason(event.getPlayer().getName()).isEmpty() ? "Banned!" : "Banned: "
-								+ SnipAPI.getBanReason(event.getPlayer().getName())));
+						SnipAPI.getBanReason(event.getPlayer()).isEmpty() ? "Banned!" : "Banned: "
+								+ SnipAPI.getBanReason(event.getPlayer())));
 			} else {
 				event.getPlayer().disconnect(new TextComponent(
-						SnipAPI.getBanReason(event.getPlayer().getName()).isEmpty() ? "Banned! R: "
-								+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer().getName())) : "Temp Banned: "
-								+ SnipAPI.getBanReason(event.getPlayer().getName())
+						SnipAPI.getBanReason(event.getPlayer()).isEmpty() ? "Banned! R: "
+								+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer())) : "Temp Banned: "
+								+ SnipAPI.getBanReason(event.getPlayer())
 								+ " R: "
-								+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer().getName()))));
+								+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer()))));
 			}
 		} else if (isAddressBanned(event.getPlayer().getAddress().getAddress())) {
 			event.getPlayer().disconnect(new TextComponent("Banned!"));

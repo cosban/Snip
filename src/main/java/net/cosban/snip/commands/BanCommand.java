@@ -25,7 +25,7 @@ public class BanCommand extends SnipCommand {
 				}
 				if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
 					SnipAPI.ban(player, sender);
-					player.disconnect(new TextComponent("Banned."));
+					player.disconnect(new TextComponent("Banned by: " + sender.getName() + " for breaking the rules."));
 					sender.sendMessage(new TextComponent(ChatColor.GREEN + player.getName() + " has been banned."));
 				} else if (!SnipAPI.isbanned(args[0].toLowerCase())) {
 					SnipAPI.ban(args[0], sender);

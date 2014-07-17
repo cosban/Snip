@@ -9,22 +9,21 @@ public class Ban {
 	private String		reason;
 	private BanType		type;
 	private String		creator;
-	private boolean		temp;
 	private long		bantime;
 	private long		remainingbantime;
 	private long		creationtime;
 	private boolean		banned;
 
 	public Ban(String player, String uuid, InetAddress address, String reason, BanType type, String creator,
-			boolean temporary, long bantime, long creationtime, boolean banned) {
+			long bantime, long creationtime, boolean banned) {
 		this.player = player;
 		this.uuid = uuid;
 		this.address = address;
 		this.reason = reason;
 		this.type = type;
 		this.creator = creator;
-		this.temp = temporary;
 		this.bantime = bantime;
+		this.banned = banned;
 		this.creationtime = creationtime;
 	}
 
@@ -35,8 +34,8 @@ public class Ban {
 		this.reason = reason;
 		this.type = BanType.IPV4;
 		this.creator = creator;
-		this.temp = false;
-		this.bantime = -1L;
+		this.bantime = 0L;
+		this.banned = banned;
 		this.creationtime = 0L;
 	}
 
@@ -77,7 +76,7 @@ public class Ban {
 	}
 
 	public boolean isTemporary() {
-		return temp;
+		return type.equals(BanType.TEMPORARY);
 	}
 
 	public boolean isBanned() {

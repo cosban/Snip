@@ -1,6 +1,7 @@
 package net.cosban.snip;
 
 import java.sql.Connection;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import net.cosban.snip.commands.BanCommand;
@@ -72,14 +73,14 @@ public class Snip extends Plugin {
 			ProxyServer.getInstance().getScheduler().runAsync(this, pool.getCloser());
 			reader = SQLReader.getManager(this);
 			writer = SQLWriter.getManager(this);
+			ProxyServer.getInstance().getScheduler().schedule(this, writer, 1, 1, TimeUnit.SECONDS);
 		} catch (ClassNotFoundException e) {
 			connected = false;
 			debug.debug(getClass(), e);
 		}
-
 		if (!connected) {
 			logger.warning("There was an issue connecting to the MySQL server.");
-			logger.warning("It is HIGHLY encouraged that you fix your database connection");
+			logger.warning("It is HIGHLY encouraged that you fix your database connection!");
 		}
 	}
 

@@ -50,23 +50,15 @@ public class SQLReader {
 	}
 
 	public ArrayList<Ban> queryBans(ProxiedPlayer p) {
-		return runBanQuery("SELECT timestamp, creator, lifetime, reason FROM `"
-				+ bansTable
-				+ "` WHERE (playerid='"
-				+ p.getUniqueId()
-				+ "');");
+		return runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playerid='" + p.getUniqueId().toString() + "');");
 	}
 
 	public ArrayList<Ban> queryAddressBans(String ip) {
-		return runBanQuery("SELECT timestamp, creator, lifetime, reason FROM `"
-				+ bansTable
-				+ "` WHERE (ip='"
-				+ ip
-				+ "');");
+		return runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (ip='" + ip + "');");
 	}
 
 	public boolean queryBanState(ProxiedPlayer p) {
-		return isBanned(runBanQuery("SELECT banned FROM `"
+		return isBanned(runBanQuery("SELECT * FROM `"
 				+ bansTable
 				+ "` WHERE (playerid='"
 				+ p.getUniqueId().toString()
@@ -74,23 +66,15 @@ public class SQLReader {
 	}
 
 	public boolean queryBanState(InetAddress address) {
-		return isBanned(runBanQuery("SELECT banned FROM `"
-				+ bansTable
-				+ "` WHERE (ip='"
-				+ address.getHostAddress()
-				+ "');"));
+		return isBanned(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (ip='" + address.getHostAddress() + "');"));
 	}
 
 	public boolean queryBanState(UUID uuid) {
-		return isBanned(runBanQuery("SELECT banned FROM `"
-				+ bansTable
-				+ "` WHERE (playerid='"
-				+ uuid.toString()
-				+ "');"));
+		return isBanned(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playerid='" + uuid.toString() + "');"));
 	}
 
 	public long queryBanLifetime(ProxiedPlayer p) {
-		return getLifeTime(runBanQuery("SELECT timestamp, lifetime, banned FROM `"
+		return getLifeTime(runBanQuery("SELECT * FROM `"
 				+ bansTable
 				+ "` WHERE (playerid='"
 				+ p.getUniqueId().toString()
@@ -124,11 +108,10 @@ public class SQLReader {
 		try {
 			ArrayList<Ban> bans = new ArrayList<>();
 			while (rs.next()) {
-				BanType t = BanType.valueOf(rs.getString("type"));
+				BanType t = BanType.valueOf(rs.getString("bantype"));
 				bans.add(new Ban(rs.getString("playername"), rs.getString("playerid"),
 						InetAddress.getByName(rs.getString("ip")), rs.getString("reason"), t, rs.getString("creator"),
-						t.equals(BanType.TEMPORARY), rs.getLong("lifetime"), rs.getLong("timestamp"),
-						rs.getBoolean("banned")));
+						rs.getLong("lifetime"), rs.getLong("timestamp"), rs.getBoolean("banned")));
 			}
 			return bans;
 		} catch (SQLException | UnknownHostException e) {

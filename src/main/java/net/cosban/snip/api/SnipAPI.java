@@ -124,7 +124,7 @@ public class SnipAPI {
 	 * @return True if the ban was set successfully.
 	 */
 	public static boolean ban(InetAddress address, CommandSender sender) {
-		return ban(address, "", sender);
+		return ban(address, "Banned by: " + sender.getName() + " for breaking the rules.", sender);
 	}
 
 	/**
@@ -142,9 +142,11 @@ public class SnipAPI {
 		return false;
 	}
 
-	public static boolean importban(String name, final String reason, final CommandSender sender, final long timestamp) {
-		return false;
-	}
+	// DISABLED
+	// public static boolean importban(String name, final String reason, final
+	// CommandSender sender, final long timestamp) {
+	// return false;
+	// }
 
 	/**
 	 * Unban a player from the server (both permanent and temporary bans)
@@ -277,7 +279,7 @@ public class SnipAPI {
 	 *         If banned by a non-player return SERVER.
 	 */
 	public static String getCreator(ProxiedPlayer player) {
-		return getCreator(player.getName());
+		return reader.queryLastBan(player).getCreator();
 	}
 
 	/**
@@ -289,7 +291,7 @@ public class SnipAPI {
 	 *         If banned by a non-player return SERVER.
 	 */
 	public static String getCreator(String name) {
-		return reader.queryLastBan(ProxyServer.getInstance().getPlayer(name)).getCreator();
+		return getCreator(ProxyServer.getInstance().getPlayer(name));
 	}
 
 	/**
@@ -313,7 +315,7 @@ public class SnipAPI {
 	 *         return null.
 	 */
 	public static String getBanReason(ProxiedPlayer player) {
-		return getBanReason(player.getName());
+		return reader.queryLastBan(player).getReason();
 	}
 
 	/**
@@ -325,7 +327,7 @@ public class SnipAPI {
 	 *         return null.
 	 */
 	public static String getBanReason(String name) {
-		return reader.queryLastBan(ProxyServer.getInstance().getPlayer(name)).getReason();
+		return getBanReason(ProxyServer.getInstance().getPlayer(name));
 	}
 
 	/**
@@ -384,7 +386,7 @@ public class SnipAPI {
 	 * @return True if ban is temporary. Otherwise false.
 	 */
 	public static boolean isTemporary(String name) {
-		return reader.queryLastBan(ProxyServer.getInstance().getPlayer(name)).isTemporary();
+		return isTemporary(ProxyServer.getInstance().getPlayer(name));
 	}
 
 	/**
@@ -395,7 +397,7 @@ public class SnipAPI {
 	 * @return True if ban is temporary. Otherwise false.
 	 */
 	public static boolean isTemporary(ProxiedPlayer player) {
-		return isTemporary(player.getName());
+		return reader.queryLastBan(player).isTemporary();
 	}
 
 	/**
@@ -437,7 +439,7 @@ public class SnipAPI {
 	 * @return The milliseconds the ban was made in unix time.
 	 */
 	public static long getTimeCreated(String name) {
-		return reader.queryLastBan(ProxyServer.getInstance().getPlayer(name)).getBanCreationTime();
+		return getTimeCreated(ProxyServer.getInstance().getPlayer(name));
 	}
 
 	/**
@@ -449,7 +451,7 @@ public class SnipAPI {
 	 * @return The milliseconds the ban was made in unix time.
 	 */
 	public static long getTimeCreated(ProxiedPlayer player) {
-		return getTimeCreated(player.getName());
+		return reader.queryLastBan(player).getBanCreationTime();
 	}
 
 	/**
