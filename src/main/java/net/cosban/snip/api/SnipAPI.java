@@ -98,7 +98,7 @@ public class SnipAPI {
 	 * @return True if the ban was set successfully.
 	 */
 	public static boolean ban(String name, final CommandSender sender) {
-		return ban(name, "", sender);
+		return ban(name, "breaking the rules", sender);
 	}
 
 	/**
@@ -142,7 +142,7 @@ public class SnipAPI {
 		return false;
 	}
 
-	// DISABLED
+	// TODO: import from csv
 	// public static boolean importban(String name, final String reason, final
 	// CommandSender sender, final long timestamp) {
 	// return false;

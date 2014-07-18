@@ -27,7 +27,7 @@ public class Ban {
 		this.creationtime = creationtime;
 	}
 
-	public Ban(InetAddress address, String reason, String creator, boolean banned) {
+	public Ban(InetAddress address, String reason, String creator, long creationtime, boolean banned) {
 		this.player = "";
 		this.uuid = "";
 		this.address = address;
@@ -36,7 +36,7 @@ public class Ban {
 		this.creator = creator;
 		this.bantime = 0L;
 		this.banned = banned;
-		this.creationtime = 0L;
+		this.creationtime = creationtime;
 	}
 
 	public String getPlayerName() {

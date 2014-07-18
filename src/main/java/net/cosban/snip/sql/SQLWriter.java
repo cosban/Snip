@@ -48,14 +48,6 @@ public class SQLWriter extends TimerTask {
 					+ " banned TINYINT(1) NOT NULL DEFAULT 0,"
 					+ " updates INT UNSIGNED NOT NULL,"
 					+ " PRIMARY KEY (uid))");
-
-			verifyTable(dbm, state, prefix + "kicks", "(uid INT UNSIGNED AUTO_INCREMENT NOT NULL,"
-					+ " timeStamp BIGINT UNSIGNED NOT NULL,"
-					+ " playername varchar(32) NOT NULL,"
-					+ " playerid varchar(36) NOT NULL,"
-					+ " creator varchar(32) NOT NULL,"
-					+ " reason varchar(255) NOT NULL,"
-					+ " PRIMARY KEY (uid))");
 			state.close();
 			c.close();
 		} catch (SQLException e) {
@@ -80,7 +72,7 @@ public class SQLWriter extends TimerTask {
 	}
 
 	public void queueBan(InetAddress address, String reason, String sender) {
-		queue.add(new BanInstanceRow(address, reason, sender, true));
+		queue.add(new BanInstanceRow(address, reason, sender, System.currentTimeMillis(), true));
 	}
 
 	public void queueTempBan(ProxiedPlayer recipient, String creator, long lifetime, String reason) {
@@ -94,11 +86,7 @@ public class SQLWriter extends TimerTask {
 	}
 
 	public void queueUnban(InetAddress address, String sender) {
-		queue.add(new BanInstanceRow(address, "", sender, false));
-	}
-
-	public void queueKick(ProxiedPlayer recipient, ProxiedPlayer creator, String reason) {
-		queue.add(new KickInstanceRow(recipient, creator, reason));
+		queue.add(new BanInstanceRow(address, "", sender, System.currentTimeMillis(), false));
 	}
 
 	@Override
@@ -168,8 +156,8 @@ public class SQLWriter extends TimerTask {
 
 	private class BanInstanceRow extends Ban implements Row {
 
-		public BanInstanceRow(InetAddress address, String reason, String creator, boolean banned) {
-			super(address, reason, creator, banned);
+		public BanInstanceRow(InetAddress address, String reason, String creator, long creationtime, boolean banned) {
+			super(address, reason, creator, creationtime, banned);
 			this.toInsert = banned;
 		}
 
@@ -228,43 +216,6 @@ public class SQLWriter extends TimerTask {
 		@Override
 		public boolean toInsert() {
 			return toInsert;
-		}
-	}
-
-	private class KickInstanceRow implements Row {
-		private final String	table	= prefix + "kicks";
-		private ProxiedPlayer	recipient, creator;
-		private String			reason;
-
-		public KickInstanceRow(ProxiedPlayer recipient, ProxiedPlayer creator, String reason) {
-			this.recipient = recipient;
-			this.creator = creator;
-			this.reason = reason;
-		}
-
-		@Override
-		public String getInsertStatement() {
-			return "INSERT INTO `"
-					+ table
-					+ "` (timeStamp, playerid, creator, reason) VALUES ("
-					+ System.currentTimeMillis()
-					+ ", "
-					+ recipient.getUniqueId()
-					+ ", "
-					+ creator.getName()
-					+ ", "
-					+ reason
-					+ ");";
-		}
-
-		@Override
-		public String getUpdateStatement() {
-			return null;
-		}
-
-		@Override
-		public boolean toInsert() {
-			return true;
 		}
 	}
 }

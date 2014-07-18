@@ -40,6 +40,7 @@ public class Snip extends Plugin {
 		files = new FileManager(this);
 		debug = new Debugger(getClass().getName(), getConfig().toUseDebug());
 		debug.setLogger(getLogger());
+		debug.debug(getClass(), "THE DEBUGGER IS ENABLED AND MAY BE VERY SPAMMY. THIS IS YOUR ONLY WARNING.");
 		logger = getLogger();
 
 		getProxy().getPluginManager().registerCommand(this, new BanCommand(this, "ban", "snip.ban", new String[] {}));

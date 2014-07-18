@@ -20,13 +20,11 @@ public class SQLReader {
 	private ConfigurationFile	config	= Snip.getConfig();
 	private final String		prefix;
 	private final String		bansTable;
-	private final String		kicksTable;
 
 	private SQLReader(Snip instance) {
 		plugin = instance;
 		prefix = config.getPrefix() != "" ? config.getPrefix() + "_" : "";
 		bansTable = prefix + "bans";
-		kicksTable = prefix + "kicks";
 	}
 
 	public static SQLReader getManager(Snip instance) {

@@ -15,7 +15,7 @@ public class PlayerConnectionHandler implements Listener {
 
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerLogin(PostLoginEvent event) {
-		// TODO: if isn't connected to sql, revert to flatfile
+		// TODO: if isn't connected to sql, revert to CSV
 		if (SnipAPI.isbanned(event.getPlayer())) {
 			if (!SnipAPI.isTemporary(event.getPlayer())) {
 				event.getPlayer().disconnect(new TextComponent(
@@ -34,24 +34,6 @@ public class PlayerConnectionHandler implements Listener {
 			event.getPlayer().disconnect(new TextComponent("Banned!"));
 		}
 	}
-
-	/*
-	 * Disabled due to handling time taking too long.
-	 * @EventHandler(priority = EventPriority.HIGHEST)
-	 * public void onServerListPing(ServerListPingEvent event) {
-	 * if (api.isConnected()) {
-	 * if (api.isbanned(event.getAddress())) {
-	 * if (!api.isTemporary(event.getAddress())) {
-	 * event.setMotd("Banned: " + api.getBanReason(event.getAddress()));
-	 * } else {
-	 * event.setMotd("Temp banned. R: " +
-	 * Forbiddance.getDurationBreakdown(api.getRemainingBanTime
-	 * (event.getAddress())));
-	 * }
-	 * }
-	 * }
-	 * }
-	 */
 
 	public boolean isAddressBanned(InetAddress address) {
 		// TODO : it'd be cool if we could ban all of Italy again
