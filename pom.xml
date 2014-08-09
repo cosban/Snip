@@ -45,6 +45,11 @@
 			<version>1.7-SNAPSHOT</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>net.cosban</groupId>
+			<artifactId>utils</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<repositories>
@@ -74,6 +79,7 @@
 									<include>commons_validator:commons-validator</include>
 									<include>com.nikhaldimann:inieditor</include>
 									<include>mysql:mysql-connector-java</include>
+									<include>net.cosban:utils</include>
 								</includes>
 							</artifactSet>
 						</configuration>
