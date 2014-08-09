@@ -26,7 +26,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class SQLConnectionPool implements Closeable {
-	// TODO: this goes in config
 	private final static int		poolSize	= 10;
 	private final static long		lifetime	= 300000;
 

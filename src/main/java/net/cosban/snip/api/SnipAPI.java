@@ -30,7 +30,7 @@ public class SnipAPI {
 	 * @return True if the player is banned
 	 */
 	public static boolean isbanned(ProxiedPlayer player) {
-		return reader.queryBanState(player);
+		return Snip.isConnected() ? reader.queryBanState(player) : false;
 	}
 
 	/**
@@ -41,7 +41,7 @@ public class SnipAPI {
 	 * @return True if the player is banned
 	 */
 	public static boolean isbanned(String name) {
-		return reader.queryBanState(name);
+		return Snip.isConnected() ? reader.queryBanState(name) : false;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class SnipAPI {
 	 * @return True if the player is banned
 	 */
 	public static boolean isbanned(UUID uuid) {
-		return reader.queryBanState(uuid);
+		return Snip.isConnected() ? reader.queryBanState(uuid) : false;
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class SnipAPI {
 	 * @return True if address is banned
 	 */
 	public static boolean isbanned(InetAddress address) {
-		return reader.queryBanState(address);
+		return Snip.isConnected() ? reader.queryBanState(address) : false;
 	}
 
 	/**
@@ -73,8 +73,8 @@ public class SnipAPI {
 	 *        ProxiedPlayer to (kick)ban
 	 * @return True if the ban was set successfully.
 	 */
-	public static boolean ban(ProxiedPlayer player, CommandSender sender) {
-		return ban(player.getName(), sender);
+	public static void ban(ProxiedPlayer player, CommandSender sender) {
+		ban(player.getName(), sender);
 	}
 
 	/**
@@ -86,8 +86,8 @@ public class SnipAPI {
 	 *        The ban reason (and kick reason if the player is online)
 	 * @return True if the ban was set successfully.
 	 */
-	public static boolean ban(ProxiedPlayer player, final String reason, CommandSender sender) {
-		return ban(player.getName(), reason, sender);
+	public static void ban(ProxiedPlayer player, final String reason, CommandSender sender) {
+		ban(player.getName(), reason, sender);
 	}
 
 	/**
@@ -97,8 +97,8 @@ public class SnipAPI {
 	 *        ProxiedPlayer to (kick)ban by name
 	 * @return True if the ban was set successfully.
 	 */
-	public static boolean ban(String name, final CommandSender sender) {
-		return ban(name, "breaking the rules", sender);
+	public static void ban(String name, final CommandSender sender) {
+		ban(name, "breaking the rules", sender);
 	}
 
 	/**
@@ -110,9 +110,10 @@ public class SnipAPI {
 	 *        The ban reason (and kick reason if the player is online)
 	 * @return True if the ban was set successfully.
 	 */
-	public static boolean ban(String name, final String reason, final CommandSender sender) {
-		writer.queueBan(ProxyServer.getInstance().getPlayer(name), sender.getName(), reason);
-		return false;
+	public static void ban(String name, final String reason, final CommandSender sender) {
+		if (Snip.isConnected()) {
+			writer.queueBan(ProxyServer.getInstance().getPlayer(name), sender.getName(), reason);
+		}
 	}
 
 	/**
@@ -123,8 +124,8 @@ public class SnipAPI {
 	 *        Address to ban in textual representation.
 	 * @return True if the ban was set successfully.
 	 */
-	public static boolean ban(InetAddress address, CommandSender sender) {
-		return ban(address, "Banned by: " + sender.getName() + " for breaking the rules.", sender);
+	public static void ban(InetAddress address, CommandSender sender) {
+		ban(address, "Banned by: " + sender.getName() + " for breaking the rules.", sender);
 	}
 
 	/**
@@ -137,9 +138,10 @@ public class SnipAPI {
 	 *        The ban reason (and kick reason if the player is online)
 	 * @return True if the ban was set successfully.
 	 */
-	public static boolean ban(InetAddress address, final String reason, CommandSender sender) {
-		writer.queueBan(address, reason, sender.getName());
-		return false;
+	public static void ban(InetAddress address, final String reason, CommandSender sender) {
+		if (Snip.isConnected()) {
+			writer.queueBan(address, reason, sender.getName());
+		}
 	}
 
 	// TODO: import from csv
@@ -155,10 +157,11 @@ public class SnipAPI {
 	 *        The player to unban.
 	 * @return True if the player was successfully unbanned.
 	 */
-	public static boolean unban(String name, CommandSender sender) {
+	public static void unban(String name, CommandSender sender) {
 		ProxyServer.getInstance().getPluginManager().callEvent(new UnbanEvent(name, sender));
-		writer.queueUnban(name, sender.getName());
-		return false;
+		if (Snip.isConnected()) {
+			writer.queueUnban(name, sender.getName());
+		}
 	}
 
 	/**
@@ -168,10 +171,12 @@ public class SnipAPI {
 	 *        The address to unban in textual representation.
 	 * @return True if the address was successfully unbanned.
 	 */
-	public static boolean unban(InetAddress address, CommandSender sender) {
+	public static void unban(InetAddress address, CommandSender sender) {
+		// TODO: should this be here?
 		ProxyServer.getInstance().getPluginManager().callEvent(new UnbanEvent(address.getHostAddress(), sender));
-		writer.queueUnban(address, sender.getName());
-		return false;
+		if (Snip.isConnected()) {
+			writer.queueUnban(address, sender.getName());
+		}
 	}
 
 	/**
@@ -183,8 +188,8 @@ public class SnipAPI {
 	 *        How long to ban the player for. (in seconds)
 	 * @return If the player was successfully temp banned.
 	 */
-	public static boolean tempban(ProxiedPlayer player, long seconds, CommandSender sender) {
-		return tempban(player.getName(), seconds, sender);
+	public static void tempban(ProxiedPlayer player, long seconds, CommandSender sender) {
+		tempban(player.getName(), seconds, sender);
 	}
 
 	/**
@@ -196,8 +201,8 @@ public class SnipAPI {
 	 *        How long to ban the player for. (in seconds)
 	 * @return If the player was successfully temp banned.
 	 */
-	public static boolean tempban(String name, long seconds, final CommandSender sender) {
-		return tempban(name, "", seconds, sender);
+	public static void tempban(String name, long seconds, final CommandSender sender) {
+		tempban(name, "", seconds, sender);
 	}
 
 	/**
@@ -209,8 +214,8 @@ public class SnipAPI {
 	 *        How long to ban the address for. (in seconds)
 	 * @return If the address was successfully temp banned.
 	 */
-	public static boolean tempban(InetAddress address, long seconds, CommandSender sender) {
-		return tempban(address.getHostAddress(), seconds, sender);
+	public static void tempban(InetAddress address, long seconds, CommandSender sender) {
+		tempban(address.getHostAddress(), seconds, sender);
 	}
 
 	/**
@@ -224,9 +229,10 @@ public class SnipAPI {
 	 *        How long to ban the player for. (in seconds)
 	 * @return If the player was successfully banned.
 	 */
-	public static boolean tempban(ProxiedPlayer player, final String reason, long seconds, String sender) {
-		writer.queueTempBan(player, sender, seconds, reason);
-		return false;
+	public static void tempban(ProxiedPlayer player, final String reason, long seconds, String sender) {
+		if (Snip.isConnected()) {
+			writer.queueTempBan(player, sender, seconds, reason);
+		}
 	}
 
 	/**
@@ -240,8 +246,8 @@ public class SnipAPI {
 	 *        How long to ban the player for. (in seconds)
 	 * @return If the player was successfully banned.
 	 */
-	public static boolean tempban(String name, final String reason, long seconds, final CommandSender sender) {
-		return tempban(ProxyServer.getInstance().getPlayer(name), sender.getName(), seconds, reason);
+	public static void tempban(String name, final String reason, long seconds, final CommandSender sender) {
+		tempban(ProxyServer.getInstance().getPlayer(name), sender.getName(), seconds, reason);
 	}
 
 	/**
@@ -255,8 +261,8 @@ public class SnipAPI {
 	 *        How long to ban the address for. (in seconds)
 	 * @return If the address was successfully banned.
 	 */
-	public static boolean tempban(InetAddress address, final String reason, long seconds, CommandSender sender) {
-		return tempban(address.getHostAddress(), reason, seconds, sender);
+	public static void tempban(InetAddress address, final String reason, long seconds, CommandSender sender) {
+		tempban(address.getHostAddress(), reason, seconds, sender);
 	}
 
 	/**

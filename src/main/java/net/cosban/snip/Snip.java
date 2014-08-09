@@ -30,7 +30,7 @@ public class Snip extends Plugin {
 	private static FileManager	files;
 	private static SQLReader	reader;
 	private static SQLWriter	writer;
-	private boolean				connected;
+	private static boolean		connected;
 	private SQLConnectionPool	pool;
 
 	protected static Logger		logger;
@@ -94,7 +94,7 @@ public class Snip extends Plugin {
 		return files;
 	}
 
-	public boolean isConnected() {
+	public static boolean isConnected() {
 		return connected;
 	}
 

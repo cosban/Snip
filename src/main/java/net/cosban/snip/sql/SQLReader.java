@@ -65,7 +65,6 @@ public class SQLReader {
 
 	public boolean queryBanState(String name) {
 		return isBanned(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playername='" + name + "');"));
-
 	}
 
 	public boolean queryBanState(InetAddress address) {
@@ -83,15 +82,6 @@ public class SQLReader {
 				+ p.getUniqueId().toString()
 				+ "');"));
 	}
-
-	// TODO: not needed but very helpful
-	// public ResultSet queryKicks(ProxiedPlayer p) {
-	// return runQuery("SELECT timestamp, creator, reason FROM `"
-	// + kicksTable
-	// + "` WHERE (playerid='"
-	// + p.getUniqueId().toString()
-	// + "');");
-	// }
 
 	public ArrayList<Ban> runBanQuery(String query) {
 		final Connection c = plugin.getConnection();

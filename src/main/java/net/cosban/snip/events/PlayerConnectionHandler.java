@@ -30,9 +30,11 @@ public class PlayerConnectionHandler implements Listener {
 								+ " R: "
 								+ TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(event.getPlayer()))));
 			}
-		} else if (isAddressBanned(event.getPlayer().getAddress().getAddress())) {
-			event.getPlayer().disconnect(new TextComponent("Banned!"));
-		}
+		} 
+		// else if
+		// (isAddressBanned(event.getPlayer().getAddress().getAddress())) {
+		// event.getPlayer().disconnect(new TextComponent("Banned!"));
+		// }
 	}
 
 	public boolean isAddressBanned(InetAddress address) {
