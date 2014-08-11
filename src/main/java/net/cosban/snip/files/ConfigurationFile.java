@@ -3,11 +3,11 @@ package net.cosban.snip.files;
 import java.io.IOException;
 
 import net.cosban.snip.Snip;
-import net.cosban.snip.managers.FileManager;
+import net.cosban.utils.files.FileManager;
+import net.cosban.utils.files.UtilFile;
 
-public class ConfigurationFile extends SnipFile {
+public class ConfigurationFile extends UtilFile {
 
-	// TODO: load into memory for reloads
 	public ConfigurationFile(FileManager files, String fileName) throws IOException {
 		super(files, fileName);
 		if (!ini.hasSection("config")) {

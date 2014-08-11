@@ -1,26 +1,21 @@
 package net.cosban.snip;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import net.cosban.snip.commands.BanCommand;
-import net.cosban.snip.commands.Ban_IPCommand;
-import net.cosban.snip.commands.KickCommand;
-import net.cosban.snip.commands.ListBansCommand;
-import net.cosban.snip.commands.LookupCommand;
 import net.cosban.snip.commands.SnipCommand;
-import net.cosban.snip.commands.TempBanCommand;
-import net.cosban.snip.commands.UnbanCommand;
-import net.cosban.snip.commands.Unban_IPCommand;
 import net.cosban.snip.events.FEventHandler;
 import net.cosban.snip.events.PlayerConnectionHandler;
 import net.cosban.snip.files.ConfigurationFile;
-import net.cosban.snip.managers.FileManager;
 import net.cosban.snip.sql.SQLReader;
 import net.cosban.snip.sql.SQLWriter;
 import net.cosban.utils.Debugger;
+import net.cosban.utils.ReflectiveClassStruct;
 import net.cosban.utils.SQLConnectionPool;
+import net.cosban.utils.commands.CommandBase;
+import net.cosban.utils.files.FileManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -37,28 +32,20 @@ public class Snip extends Plugin {
 
 	public void onEnable() {
 		version = getDescription().getVersion();
-		files = new FileManager(this);
+		files = new FileManager(getClass());
+		try {
+			files.addFile("configuration", new ConfigurationFile(files, "configuration"));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		debug = new Debugger(getClass().getName(), getConfig().toUseDebug());
 		debug.setLogger(getLogger());
 		debug.debug(getClass(), "THE DEBUGGER IS ENABLED AND MAY BE VERY SPAMMY. THIS IS YOUR ONLY WARNING.");
 		logger = getLogger();
 
-		getProxy().getPluginManager().registerCommand(this, new BanCommand(this, "ban", "snip.ban", new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new UnbanCommand(this, "unban", "snip.unban",
-				new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new Ban_IPCommand(this, "ban-ip", "snip.banip",
-				new String[] { "banip", "ipban", "ip-ban" }));
-		getProxy().getPluginManager().registerCommand(this, new Unban_IPCommand(this, "unban-ip", "snip.unbanip",
-				new String[] { "unbanip", "ipunban", "ip-unban" }));
-		getProxy().getPluginManager().registerCommand(this, new LookupCommand(this, "lookup", "snip.lookup",
-				new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new ListBansCommand(this, "listbans", "snip.listbans",
-				new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new TempBanCommand(this, "tempban", "snip.ban",
-				new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new KickCommand(this, "kick", "snip.kick", new String[] {}));
-		getProxy().getPluginManager().registerCommand(this, new SnipCommand(this, "snip", "snip.snip",
-				new String[] { "forbiddance" }));
+		registerCommands();
+
 		getProxy().getPluginManager().registerListener(this, new FEventHandler());
 		getProxy().getPluginManager().registerListener(this, new PlayerConnectionHandler());
 
@@ -140,5 +127,34 @@ public class Snip extends Plugin {
 
 	public static String getVersion() {
 		return version;
+	}
+
+	// TODO: none of this works due to not having command annotations
+	private void registerCommands() {
+		for (Class<?> c : ReflectiveClassStruct.getClassesForPackage(getClass(), "net.cosban.scct.commands")) {
+			try {
+				if (ReflectiveClassStruct.containsConstructor(c, String.class)) {
+					if (c.getConstructor(String.class).isAnnotationPresent(CommandBase.class)) {
+						String name = getCommandStructure(c).name();
+						String[] aliases = getCommandStructure(c).aliases();
+						String perms = getCommandStructure(c).permission();
+						SnipCommand com = (SnipCommand) c.getConstructor(String.class, String.class, String[].class).newInstance(name, perms, aliases);
+						// com.registerParams();
+						ProxyServer.getInstance().getPluginManager().registerCommand(this, com);
+						debug().debug(this.getClass(), "Registered command: " + name);
+					}
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public CommandBase getCommandStructure(Class<?> c) throws NoSuchMethodException, SecurityException {
+		return c.getConstructor(String.class).getAnnotation(CommandBase.class);
+	}
+
+	public CommandBase getCommandStructure(SnipCommand com) throws NoSuchMethodException, SecurityException {
+		return getCommandStructure(com.getClass());
 	}
 }
