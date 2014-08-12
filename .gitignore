@@ -1,18 +1,26 @@
-# Eclipse stuff
-*.settings
+#################
+## Eclipse
+#################
+*.pydevproject
 .project
+.metadata
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
 .classpath
+.settings/
+.loadpath
 
-# Maven stuff
+#################
+## Intellij
+#################
+*.iml
+
+#################
+## Maven
+#################
 target/
-
-
-# Not source
-*.class
-
-# Package Files #
-*.jar
-*.war
-*.ear
-/target
-/target

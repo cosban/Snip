@@ -2,18 +2,27 @@ package net.cosban.snip.commands;
 
 import java.util.Map;
 
-import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
 import net.cosban.utils.TimeUtils;
+import net.cosban.utils.commands.CommandBase;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class LookupCommand extends SnipCommand {
+	@CommandBase(
+			name = "lookup",
+			params = {},
+			description = "Looks up whether a player or IP is banned",
+			aliases = {},
+			permission = "snip.lookup")
+	public LookupCommand(String name) {
+		super(name);
+	}
 
-	public LookupCommand(Snip instance, String name, String permission, String[] aliases) {
-		super(instance, name, permission, aliases);
+	public LookupCommand(String name, String permission, String[] aliases) {
+		super(name, permission, aliases);
 	}
 
 	public void execute(CommandSender sender, String[] args) {

@@ -3,8 +3,8 @@ package net.cosban.snip.commands;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
+import net.cosban.utils.commands.CommandBase;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
@@ -13,8 +13,18 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class Ban_IPCommand extends SnipCommand {
 
-	public Ban_IPCommand(Snip instance, String name, String permission, String[] aliases) {
-		super(instance, name, permission, aliases);
+	@CommandBase(
+			name = "ban-ip",
+			params = {},
+			description = "Bans a specified, or players IP or range",
+			aliases = { "banip", "ipban", "ip-ban" },
+			permission = "snip.banip")
+	public Ban_IPCommand(String name) {
+		super(name);
+	}
+
+	public Ban_IPCommand(String name, String permission, String[] aliases) {
+		super(name, permission, aliases);
 	}
 
 	public void execute(CommandSender sender, String[] args) {

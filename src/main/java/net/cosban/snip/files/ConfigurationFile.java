@@ -8,8 +8,8 @@ import net.cosban.utils.files.UtilFile;
 
 public class ConfigurationFile extends UtilFile {
 
-	public ConfigurationFile(FileManager files, String fileName) throws IOException {
-		super(files, fileName);
+	public ConfigurationFile(FileManager files) throws IOException {
+		super(files, "configuration");
 		if (!ini.hasSection("config")) {
 			ini.addSection("config");
 			ini.addComment("config", "This is the configuration file, read the instructions located at cosban.net for more information\nYou were running Snip v"

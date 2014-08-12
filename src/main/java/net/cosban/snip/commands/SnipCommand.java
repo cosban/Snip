@@ -2,6 +2,7 @@ package net.cosban.snip.commands;
 
 import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
+import net.cosban.utils.commands.CommandBase;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -10,11 +11,18 @@ import net.md_5.bungee.api.plugin.Command;
 
 public class SnipCommand extends Command {
 
-	private Snip	plugin;
+	@CommandBase(
+			name = "snip",
+			params = { "status", "info", "size", "status" },
+			description = "Plugin administration and information",
+			aliases = { "forbiddance" },
+			permission = "snip.snip")
+	public SnipCommand(String name) {
+		super(name);
+	}
 
-	public SnipCommand(Snip instance, String name, String permission, String[] aliases) {
+	public SnipCommand(String name, String permission, String[] aliases) {
 		super(name, permission, aliases);
-		plugin = instance;
 	}
 
 	public void execute(CommandSender sender, String[] args) {
@@ -49,7 +57,7 @@ public class SnipCommand extends Command {
 	public void status(CommandSender sender) {
 		sender.sendMessage(new TextComponent(ChatColor.GREEN
 				+ "Snip is currently using "
-				+ (plugin.isConnected() ? "MySQL" : "a flat file")
+				+ (Snip.isConnected() ? "MySQL" : "a flat file")
 				+ " to store bans."));
 	}
 

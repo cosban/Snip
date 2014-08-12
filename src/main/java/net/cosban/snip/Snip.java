@@ -1,6 +1,5 @@
 package net.cosban.snip;
 
-import java.io.IOException;
 import java.sql.Connection;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -32,13 +31,7 @@ public class Snip extends Plugin {
 
 	public void onEnable() {
 		version = getDescription().getVersion();
-		files = new FileManager(getClass());
-		try {
-			files.addFile("configuration", new ConfigurationFile(files, "configuration"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
+		files = new FileManager(getClass(), "./plugins/snip/");
 		debug = new Debugger(getClass().getName(), getConfig().toUseDebug());
 		debug.setLogger(getLogger());
 		debug.debug(getClass(), "THE DEBUGGER IS ENABLED AND MAY BE VERY SPAMMY. THIS IS YOUR ONLY WARNING.");
@@ -129,7 +122,6 @@ public class Snip extends Plugin {
 		return version;
 	}
 
-	// TODO: none of this works due to not having command annotations
 	private void registerCommands() {
 		for (Class<?> c : ReflectiveClassStruct.getClassesForPackage(getClass(), "net.cosban.scct.commands")) {
 			try {
@@ -139,13 +131,12 @@ public class Snip extends Plugin {
 						String[] aliases = getCommandStructure(c).aliases();
 						String perms = getCommandStructure(c).permission();
 						SnipCommand com = (SnipCommand) c.getConstructor(String.class, String.class, String[].class).newInstance(name, perms, aliases);
-						// com.registerParams();
 						ProxyServer.getInstance().getPluginManager().registerCommand(this, com);
 						debug().debug(this.getClass(), "Registered command: " + name);
 					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				debug().debug(getClass(), e);
 			}
 		}
 	}
