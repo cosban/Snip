@@ -1,13 +1,15 @@
-package net.cosban.snip.events;
+package net.cosban.snip.listeners;
 
 import net.cosban.snip.api.Ban.BanType;
+import net.cosban.snip.events.BanEvent;
+import net.cosban.snip.events.KickEvent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
-public class FEventHandler implements Listener {
+public class SnipListener implements Listener {
 	@EventHandler
 	public void onBan(BanEvent event) {
 		ProxyServer.getInstance().broadcast(new TextComponent(ChatColor.YELLOW

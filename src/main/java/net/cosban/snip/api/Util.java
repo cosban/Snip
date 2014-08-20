@@ -1,13 +1,6 @@
 package net.cosban.snip.api;
 
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,11 +9,11 @@ import java.util.logging.Logger;
 
 /**
  * LogBlock utils refactored for Forbiddance use.
- * 
+ *
  * @author DiddiZ
  */
 public class Util {
-	public static String	newline	= System.getProperty("line.separator");
+	public static String newline = System.getProperty("line.separator");
 
 	public static void download(Logger log, URL url, File file) throws IOException {
 		if (!file.getParentFile().exists()) file.getParentFile().mkdir();
@@ -50,8 +43,7 @@ public class Util {
 		final StringBuilder content = new StringBuilder();
 		final BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
 		String inputLine;
-		while ((inputLine = in.readLine()) != null)
-			content.append(inputLine);
+		while ((inputLine = in.readLine()) != null) content.append(inputLine);
 		in.close();
 		return content.toString();
 	}
@@ -60,7 +52,8 @@ public class Util {
 		try {
 			Integer.parseInt(str);
 			return true;
-		} catch (final NumberFormatException ex) {}
+		} catch (final NumberFormatException ex) {
+		}
 		return false;
 	}
 
@@ -68,7 +61,8 @@ public class Util {
 		try {
 			Byte.parseByte(str);
 			return true;
-		} catch (final NumberFormatException ex) {}
+		} catch (final NumberFormatException ex) {
+		}
 		return false;
 	}
 
@@ -114,13 +108,9 @@ public class Util {
 					final String param = spec.substring(currIndex - 1, currIndex).toLowerCase();
 					if (param.equals("d")) {
 						days = Integer.parseInt(spec.substring(lastIndex, currIndex - 1));
-					}
-
-					else if (param.equals("h")) {
+					} else if (param.equals("h")) {
 						hours = Integer.parseInt(spec.substring(lastIndex, currIndex - 1));
-					}
-
-					else if (param.equals("m")) {
+					} else if (param.equals("m")) {
 						minutes = Integer.parseInt(spec.substring(lastIndex, currIndex - 1));
 					}
 				}
@@ -137,14 +127,13 @@ public class Util {
 		final String timestamp;
 		if (spec.contains(":")) {
 			timestamp = new SimpleDateFormat("dd.MM.yyyy").format(System.currentTimeMillis()) + " " + spec;
-		}
-
-		else {
+		} else {
 			timestamp = spec + " 00:00:00";
 		}
 
 		try {
-			return (int) ((System.currentTimeMillis() - new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(timestamp).getTime()) / 60000);
+			return (int) ((System.currentTimeMillis()
+					- new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").parse(timestamp).getTime()) / 60000);
 		} catch (final ParseException ex) {
 			return -1;
 		}

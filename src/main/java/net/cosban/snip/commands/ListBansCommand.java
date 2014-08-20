@@ -1,12 +1,5 @@
 package net.cosban.snip.commands;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
-
 import net.cosban.snip.api.SnipAPI;
 import net.cosban.utils.TimeUtils;
 import net.cosban.utils.commands.CommandBase;
@@ -15,13 +8,20 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 public class ListBansCommand extends SnipCommand {
 
 	@CommandBase(
 			name = "listbans",
-			params = {},
+			params = { },
 			description = "Lists all active bans",
-			aliases = {},
+			aliases = { },
 			permission = "snip.listbans")
 	public ListBansCommand(String name) {
 		super(name);

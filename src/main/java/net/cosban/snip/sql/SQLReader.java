@@ -1,5 +1,11 @@
 package net.cosban.snip.sql;
 
+import net.cosban.snip.Snip;
+import net.cosban.snip.api.Ban;
+import net.cosban.snip.api.Ban.BanType;
+import net.cosban.snip.files.ConfigurationFile;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.Connection;
@@ -9,17 +15,11 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import net.cosban.snip.Snip;
-import net.cosban.snip.api.Ban;
-import net.cosban.snip.api.Ban.BanType;
-import net.cosban.snip.files.ConfigurationFile;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-
 public class SQLReader {
-	private Snip				plugin;
-	private ConfigurationFile	config	= Snip.getConfig();
-	private final String		prefix;
-	private final String		bansTable;
+	private final String prefix;
+	private final String bansTable;
+	private Snip plugin;
+	private ConfigurationFile config = Snip.getConfig();
 
 	private SQLReader(Snip instance) {
 		plugin = instance;
@@ -68,7 +68,11 @@ public class SQLReader {
 	}
 
 	public boolean queryBanState(InetAddress address) {
-		return isBanned(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (ip='" + address.getHostAddress() + "');"));
+		return isBanned(runBanQuery("SELECT * FROM `"
+				+ bansTable
+				+ "` WHERE (ip='"
+				+ address.getHostAddress()
+				+ "');"));
 	}
 
 	public boolean queryBanState(UUID uuid) {
@@ -102,9 +106,7 @@ public class SQLReader {
 			ArrayList<Ban> bans = new ArrayList<>();
 			while (rs.next()) {
 				BanType t = BanType.valueOf(rs.getString("bantype"));
-				bans.add(new Ban(rs.getString("playername"), rs.getString("playerid"),
-						InetAddress.getByName(rs.getString("ip")), rs.getString("reason"), t, rs.getString("creator"),
-						rs.getLong("lifetime"), rs.getLong("timestamp"), rs.getBoolean("banned")));
+				bans.add(new Ban(rs.getString("playername"), rs.getString("playerid"), InetAddress.getByName(rs.getString("ip")), rs.getString("reason"), t, rs.getString("creator"), rs.getLong("lifetime"), rs.getLong("timestamp"), rs.getBoolean("banned")));
 			}
 			return bans;
 		} catch (SQLException | UnknownHostException e) {

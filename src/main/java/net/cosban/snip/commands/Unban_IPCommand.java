@@ -11,7 +11,7 @@ public class Unban_IPCommand extends SnipCommand {
 
 	@CommandBase(
 			name = "unban-ip",
-			params = {},
+			params = { },
 			description = "Temporarily bans a player from bungee",
 			aliases = { "unbanip", "ipunban", "ip-unban" },
 			permission = "snip.unbanip")

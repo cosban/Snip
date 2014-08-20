@@ -4,12 +4,12 @@ import net.cosban.snip.api.Ban.BanType;
 import net.md_5.bungee.api.CommandSender;
 
 public class BanEvent extends SnipEvent {
-	private String			name;
-	private CommandSender	invoker;
-	private String			reason;
-	private long			timestamp;
-	private long			bantime;
-	private BanType			type;
+	private String        name;
+	private CommandSender invoker;
+	private String        reason;
+	private long          timestamp;
+	private long          bantime;
+	private BanType       type;
 
 	public BanEvent(String name, CommandSender invoker, String reason, long timestamp, BanType type) {
 		this.name = name;

@@ -1,10 +1,10 @@
 package net.cosban.snip.files;
 
-import java.io.IOException;
-
 import net.cosban.snip.Snip;
 import net.cosban.utils.files.FileManager;
 import net.cosban.utils.files.UtilFile;
+
+import java.io.IOException;
 
 public class ConfigurationFile extends UtilFile {
 
@@ -12,12 +12,11 @@ public class ConfigurationFile extends UtilFile {
 		super(files, "configuration");
 		if (!ini.hasSection("config")) {
 			ini.addSection("config");
-			ini.addComment("config", "This is the configuration file, read the instructions located at cosban.net for more information\nYou were running Snip v"
-					+ Snip.getVersion()
-					+ " when this file was generated");
-			ini.set("config", "server-id", "0");
+			ini.addComment("config",
+					"This is the configuration file, read the instructions located at cosban.net for more information\nYou were running Snip v"
+							+ Snip.getVersion()
+							+ " when this file was generated");
 			ini.set("config", "debug", "false");
-
 		}
 		if (!ini.hasSection("mysql")) {
 			ini.addSection("mysql");
@@ -109,5 +108,4 @@ public class ConfigurationFile extends UtilFile {
 		ini.set("mysql", "password", password);
 		files.save(this);
 	}
-
 }

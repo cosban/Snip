@@ -14,9 +14,9 @@ public class TempBanCommand extends SnipCommand {
 
 	@CommandBase(
 			name = "tempban",
-			params = {},
+			params = { },
 			description = "Temporarily bans a player",
-			aliases = {},
+			aliases = { },
 			permission = "snip.ban")
 	public TempBanCommand(String name) {
 		super(name);
@@ -66,10 +66,9 @@ public class TempBanCommand extends SnipCommand {
 				message = message.trim();
 				if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
 					SnipAPI.tempban(player, message, Util.parseTimeSpec(args[1]) * 60, sender.getName());
-					SnipAPI.kickPlayer(player, "Temp Banned: \""
-							+ message
-							+ "\" R: "
-							+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60), sender);
+					SnipAPI.kickPlayer(player, "Temp Banned: \"" + message + "\" R: " + TimeUtils.getDurationBreakdown(
+							Util.parseTimeSpec(args[1])
+									* 60), sender);
 					sender.sendMessage(new TextComponent(ChatColor.GREEN
 							+ player.getName()
 							+ " has been banned for "

@@ -11,9 +11,9 @@ public class UnbanCommand extends SnipCommand {
 
 	@CommandBase(
 			name = "unban",
-			params = {},
+			params = { },
 			description = "Unbans a player from bungee",
-			aliases = {},
+			aliases = { },
 			permission = "snip.unban")
 	public UnbanCommand(String name) {
 		super(name);

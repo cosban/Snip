@@ -1,7 +1,5 @@
 package net.cosban.snip.commands;
 
-import java.util.Map;
-
 import net.cosban.snip.api.SnipAPI;
 import net.cosban.utils.TimeUtils;
 import net.cosban.utils.commands.CommandBase;
@@ -10,12 +8,14 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
+import java.util.Map;
+
 public class LookupCommand extends SnipCommand {
 	@CommandBase(
 			name = "lookup",
-			params = {},
+			params = { },
 			description = "Looks up whether a player or IP is banned",
-			aliases = {},
+			aliases = { },
 			permission = "snip.lookup")
 	public LookupCommand(String name) {
 		super(name);

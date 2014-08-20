@@ -3,16 +3,16 @@ package net.cosban.snip.api;
 import java.net.InetAddress;
 
 public class Ban {
-	private String		player;
-	private String		uuid;
-	private InetAddress	address;
-	private String		reason;
-	private BanType		type;
-	private String		creator;
-	private long		bantime;
-	private long		remainingbantime;
-	private long		creationtime;
-	private boolean		banned;
+	private String      player;
+	private String      uuid;
+	private InetAddress address;
+	private String      reason;
+	private BanType     type;
+	private String      creator;
+	private long        bantime;
+	private long        remainingbantime;
+	private long        creationtime;
+	private boolean     banned;
 
 	public Ban(String player, String uuid, InetAddress address, String reason, BanType type, String creator,
 			long bantime, long creationtime, boolean banned) {
@@ -91,6 +91,7 @@ public class Ban {
 	public enum BanType {
 		PERMANENT("PERMANENT"),
 		HELLBAN("HELLBAN"),
+		ALTBAN("ALTBAN"),
 		TEMPORARY("TEMPORARY"),
 		IPV4("IPV4"),
 		IPV6("IPV6"),
@@ -98,7 +99,7 @@ public class Ban {
 		IPV6_CIDR("IPV6_CIDR"),
 		UNBAN("UNBAN");
 
-		private String	toString;
+		private String toString;
 
 		private BanType(String name) {
 			this.toString = name;

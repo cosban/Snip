@@ -4,9 +4,9 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 public class KickEvent extends SnipEvent {
-	private ProxiedPlayer	player;
-	private CommandSender	invoker;
-	private String			reason;
+	private ProxiedPlayer player;
+	private CommandSender invoker;
+	private String        reason;
 
 	public KickEvent(ProxiedPlayer player, CommandSender invoker, String reason) {
 		this.player = player;
