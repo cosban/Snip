@@ -1,6 +1,9 @@
 package net.cosban.snip.api;
 
+import net.cosban.snip.Snip;
+
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class Ban {
 	private String      player;
@@ -9,32 +12,43 @@ public class Ban {
 	private String      reason;
 	private BanType     type;
 	private String      creator;
-	private long        bantime;
-	private long        remainingbantime;
+	private long        duration;
 	private long        creationtime;
 	private boolean     banned;
 
-	public Ban(String player, String uuid, InetAddress address, String reason, BanType type, String creator,
-			long bantime, long creationtime, boolean banned) {
+	public Ban(String player, String uuid, String address, String reason, BanType type, String creator, long duration,
+			long creationtime, boolean banned) {
 		this.player = player;
 		this.uuid = uuid;
-		this.address = address;
+		//TODO: check for this before construction
+		try {
+			this.address = InetAddress.getByName(address);
+		} catch (UnknownHostException e) {
+			Snip.debug().debug(getClass(), e);
+			this.address = null;
+		}
 		this.reason = reason;
 		this.type = type;
 		this.creator = creator;
-		this.bantime = bantime;
+		this.duration = duration;
 		this.banned = banned;
 		this.creationtime = creationtime;
 	}
 
-	public Ban(InetAddress address, String reason, String creator, long creationtime, boolean banned) {
+	public Ban(String address, String reason, String creator, long creationtime, boolean banned) {
 		this.player = "";
 		this.uuid = "";
-		this.address = address;
+		//TODO: check for this before construction
+		try {
+			this.address = InetAddress.getByName(address);
+		} catch (UnknownHostException e) {
+			Snip.debug().debug(getClass(), e);
+			this.address = null;
+		}
 		this.reason = reason;
 		this.type = BanType.IPV4;
 		this.creator = creator;
-		this.bantime = 0L;
+		this.duration = 0L;
 		this.banned = banned;
 		this.creationtime = creationtime;
 	}
@@ -63,16 +77,16 @@ public class Ban {
 		return creator.toLowerCase();
 	}
 
-	public long getBanCreationTime() {
+	public long getCreationTime() {
 		return creationtime;
 	}
 
-	public long getBanTime() {
-		return bantime;
+	public long getDuration() {
+		return duration;
 	}
 
 	public long getRemainingBanTime() {
-		return remainingbantime;
+		return duration - (System.currentTimeMillis() - getCreationTime());
 	}
 
 	public boolean isTemporary() {

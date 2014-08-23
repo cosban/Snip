@@ -1,21 +1,19 @@
 package net.cosban.snip.events;
 
-import net.md_5.bungee.api.CommandSender;
-
 public class UnbanEvent extends SnipEvent {
-	private String        name;
-	private CommandSender invoker;
+	private String name;
+	private String creator;
 
-	public UnbanEvent(String name, CommandSender invoker) {
+	public UnbanEvent(String name, String creator) {
 		this.name = name;
-		this.invoker = invoker;
+		this.creator = creator;
 	}
 
 	public String getName() {
 		return name;
 	}
 
-	public CommandSender getInvoker() {
-		return invoker;
+	public String getInvoker() {
+		return creator;
 	}
 }

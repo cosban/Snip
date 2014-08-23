@@ -1,5 +1,6 @@
 package net.cosban.snip.commands;
 
+import net.cosban.snip.Snip;
 import net.cosban.snip.api.SnipAPI;
 import net.cosban.utils.commands.CommandBase;
 import net.md_5.bungee.api.ChatColor;
@@ -14,8 +15,8 @@ import java.net.UnknownHostException;
 public class Ban_IPCommand extends SnipCommand {
 
 	@CommandBase(
-			name = "ban-ip",
-			params = { },
+			name = "banip",
+			params = { "address" },
 			description = "Bans a specified, or players IP or range",
 			aliases = { "banip", "ipban", "ip-ban" },
 			permission = "snip.banip")
@@ -28,65 +29,29 @@ public class Ban_IPCommand extends SnipCommand {
 	}
 
 	public void execute(CommandSender sender, String[] args) {
-		if (sender.hasPermission("snip.banip") || !(sender instanceof ProxiedPlayer)) {
-			if (args.length == 1) {
-				if (!SnipAPI.isbanned(args[0])) {
-					if (!args[0].matches("[A-Fa-f\\d\\.:]+/[\\d]{1,3}")) {
-						sender.sendMessage(new TextComponent(ChatColor.DARK_RED + "Not a valid IP address!"));
-						return;
-					}
-					ban(sender, args[0], "IP banned");
-				} else if (args.length >= 2) {
-					if (args[0].equals("-p")) {
-						ban(sender, ProxyServer.getInstance().getPlayer(args[0]), getMessage(args, 2));
-					} else {
-						ban(sender, args[0], getMessage(args, 1));
+		if (args.length < 1) {
+			sender.sendMessage(new TextComponent(ChatColor.RED + getSyntax()));
+			return;
+		}
+		if (args[0].equals("-p")) {
+			ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[1]);
+			if (player != null) {
+				SnipAPI.banIP(player.getName(),player.getUniqueId(),player.getAddress().getAddress(),
+						"IP BANNED: " + getMessage(args,2),sender.getName());
+				for (ProxiedPlayer p : ProxyServer.getInstance().getPlayers()) {
+					if (p.getAddress().getAddress().equals(player.getAddress().getAddress())) {
+						SnipAPI.kickPlayer(p, "IP BANNED: " + getMessage(args, 2), sender.getName());
 					}
 				}
 			} else {
-				sender.sendMessage(new TextComponent(ChatColor.RED
-						+ "Syntax: /ban-ip [-p] <address[/prefixlen]|name> [reason]"));
+				sender.sendMessage(new TextComponent(ChatColor.RED + args[1] + " is not online!"));
 			}
 		} else {
-			sender.sendMessage(new TextComponent(ChatColor.RED + "You do not have permission for this command!"));
-			SnipAPI.kickPlayer((ProxiedPlayer) sender, ChatColor.DARK_RED
-					+ "YOU DO NOT HAVE PERMISSION FOR THIS COMMAND!", sender);
-			return;
-		}
-	}
-
-	private String getMessage(String[] args, int index) {
-		String message = "";
-		for (int i = index; i < args.length; i++) {
-			message += args[i] + " ";
-		}
-		return message.trim();
-	}
-
-	private void ban(CommandSender sender, InetAddress address, String reason) {
-		if (!SnipAPI.isbanned(address)) {
-			SnipAPI.ban(address, reason, sender);
-			for (ProxiedPlayer p : ProxyServer.getInstance().getPlayers()) {
-				if (address.getHostAddress().equalsIgnoreCase(p.getAddress().getAddress().getHostAddress())) {
-					// TODO: fix reason
-					SnipAPI.kickPlayer(p, "IP Banned: " + reason, sender);
-				}
+			try {
+				SnipAPI.banIP(InetAddress.getByName(args[0]), "IP BANNED: " + getMessage(args, 1), sender.getName());
+			} catch (UnknownHostException e) {
+				Snip.debug().debug(getClass(), e);
 			}
-			sender.sendMessage(new TextComponent(ChatColor.GREEN + address.getHostAddress() + " has been IP banned."));
-		} else {
-			sender.sendMessage(new TextComponent(ChatColor.RED + address.getHostAddress() + " is already IP banned!"));
-		}
-	}
-
-	private void ban(CommandSender sender, ProxiedPlayer player, String reason) {
-		ban(sender, player.getAddress().getAddress(), reason);
-	}
-
-	private void ban(CommandSender sender, String address, String reason) {
-		try {
-			ban(sender, InetAddress.getByName(address), reason);
-		} catch (UnknownHostException e) {
-			sender.sendMessage(new TextComponent(ChatColor.DARK_RED + "Unknown host or not a valid IP address!"));
 		}
 	}
 }

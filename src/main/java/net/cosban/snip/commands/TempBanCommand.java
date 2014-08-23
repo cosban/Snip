@@ -27,73 +27,40 @@ public class TempBanCommand extends SnipCommand {
 	}
 
 	public void execute(CommandSender sender, String[] args) {
-		if (sender.hasPermission("snip.ban") || !(sender instanceof ProxiedPlayer)) {
-			ProxiedPlayer player;
-			if (args.length == 2) {
-				if (!args[0].matches("[_A-Za-z0-9]{1,16}")) {
-					sender.sendMessage(new TextComponent(ChatColor.RED
-							+ "Invalid player name specified (1-16 chars of \'A-Za-z0-9_\')"));
-					return;
-				}
-				if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
-					SnipAPI.tempban(player, Util.parseTimeSpec(args[1]) * 60, sender);
-					SnipAPI.kickPlayer(player, "Temporarily banned for "
-							+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60), sender);
-					sender.sendMessage(new TextComponent(ChatColor.GREEN
-							+ player.getName()
-							+ " has been banned for "
-							+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60)));
-				} else {
-					if (!SnipAPI.isbanned(args[0].toLowerCase())) {
-						SnipAPI.tempban(args[0], Util.parseTimeSpec(args[1]) * 60, sender);
-						sender.sendMessage(new TextComponent(ChatColor.GREEN
-								+ args[0]
-								+ " has been banned for "
-								+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60)));
-					} else {
-						sender.sendMessage(new TextComponent(ChatColor.RED + args[0] + " is already banned!"));
-					}
-				}
-			} else if (args.length >= 3) {
-				if (!args[0].matches("[_A-Za-z0-9]{1,16}")) {
-					sender.sendMessage(new TextComponent(ChatColor.RED
-							+ "Invalid player name specified (1-16 chars of \'A-Za-z0-9_\')"));
-					return;
-				}
-				String message = "";
-				for (int i = 2; i < args.length; i++)
-					message += args[i] + " ";
-				message = message.trim();
-				if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
-					SnipAPI.tempban(player, message, Util.parseTimeSpec(args[1]) * 60, sender.getName());
-					SnipAPI.kickPlayer(player, "Temp Banned: \"" + message + "\" R: " + TimeUtils.getDurationBreakdown(
-							Util.parseTimeSpec(args[1])
-									* 60), sender);
-					sender.sendMessage(new TextComponent(ChatColor.GREEN
-							+ player.getName()
-							+ " has been banned for "
-							+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60)));
-				} else {
-					if (!SnipAPI.isbanned(args[0].toLowerCase())) {
-						SnipAPI.tempban(args[0], message, Util.parseTimeSpec(args[1]) * 60, sender);
-						sender.sendMessage(new TextComponent(ChatColor.GREEN
-								+ args[0]
-								+ " has been banned for "
-								+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60)));
-					} else {
-						sender.sendMessage(new TextComponent(ChatColor.RED + args[0] + " is already banned!"));
-					}
-				}
-			} else {
-				sender.sendMessage(new TextComponent(ChatColor.RED + "Syntax: /tempban <player> <time> [reason]"));
-				sender.sendMessage(new TextComponent(ChatColor.RED
-						+ "Time is specified in days, hours or minutes. E.g. 8d or 26m."));
-			}
-		} else {
-			sender.sendMessage(new TextComponent(ChatColor.RED + "You do not have permission for this command!"));
-			SnipAPI.kickPlayer((ProxiedPlayer) sender, ChatColor.DARK_RED
-					+ "YOU DO NOT HAVE PERMISSION FOR THIS COMMAND!", sender);
+		if (args.length < 2) {
+			sender.sendMessage(new TextComponent(getSyntax()));
 			return;
+		}
+		if (!args[0].matches("[_A-Za-z0-9]{1,16}")) {
+			sender.sendMessage(new TextComponent(ChatColor.RED
+					+ "Invalid player name specified (1-16 chars of \'A-Za-z0-9_\')"));
+			return;
+		}
+
+		ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[0]);
+		if (player != null) {
+			SnipAPI.tempban(player.getName(), player.getUniqueId().toString(), player.getAddress().getAddress()
+							.getHostAddress(),
+					"TEMP BANNED: "
+							+ getMessage(args, 2), sender.getName(), Util.parseTimeSpec(args[1]) * 60);
+			SnipAPI.kickPlayer(player.getName(), "TEMP BANNED UNTIL: "
+					+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60)
+					+ " FOR: "
+					+ getMessage(args, 2), sender.getName());
+			sender.sendMessage(new TextComponent(ChatColor.GREEN
+					+ player.getName()
+					+ " has been banned until "
+					+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60)));
+		} else {
+			if (!SnipAPI.isBanned(args[0].toLowerCase())) {
+				SnipAPI.tempban(args[0], sender.getName(), Util.parseTimeSpec(args[1]) * 60);
+				sender.sendMessage(new TextComponent(ChatColor.GREEN
+						+ args[0]
+						+ " has been banned for "
+						+ TimeUtils.getDurationBreakdown(Util.parseTimeSpec(args[1]) * 60)));
+			} else {
+				sender.sendMessage(new TextComponent(ChatColor.RED + args[0] + " is already banned!"));
+			}
 		}
 	}
 }

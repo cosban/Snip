@@ -7,7 +7,6 @@ import net.cosban.snip.files.ConfigurationFile;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,7 +17,7 @@ import java.util.UUID;
 public class SQLReader {
 	private final String prefix;
 	private final String bansTable;
-	private Snip plugin;
+	private       Snip   plugin;
 	private ConfigurationFile config = Snip.getConfig();
 
 	private SQLReader(Snip instance) {
@@ -37,30 +36,58 @@ public class SQLReader {
 		return manager;
 	}
 
-	public Ban queryLastBan(ProxiedPlayer p) {
+	public Ban queryLastBan(String name) {
 		Ban latest = null;
-		for (Ban b : queryBans(p)) {
-			if (latest == null || b.getBanCreationTime() > latest.getBanCreationTime()) {
+		for (Ban b : queryBans(name)) {
+			if (latest == null || b.getCreationTime() > latest.getCreationTime()) {
 				latest = b;
 			}
 		}
 		return latest;
 	}
 
-	public ArrayList<Ban> queryBans(ProxiedPlayer p) {
-		return runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playerid='" + p.getUniqueId().toString() + "');");
+	public Ban queryLastBan(UUID uuid) {
+		Ban latest = null;
+		for (Ban b : queryBans(uuid)) {
+			if (latest == null || b.getCreationTime() > latest.getCreationTime()) {
+				latest = b;
+			}
+		}
+		return latest;
+	}
+
+	public Ban queryLastBan(InetAddress address) {
+		Ban latest = null;
+		for (Ban b : queryBans(address)) {
+			if (latest == null || b.getCreationTime() > latest.getCreationTime()) {
+				latest = b;
+			}
+		}
+		return latest;
+	}
+
+	public ArrayList<Ban> queryBans(UUID uuid) {
+		return runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playerid='" + uuid + "');");
+	}
+
+	public ArrayList<Ban> queryBans(String name) {
+		return runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playername='" + name + "');");
+	}
+
+	public ArrayList<Ban> queryBans(InetAddress address) {
+		return runBanQuery("SELECT * FROM `"
+				+ bansTable
+				+ "` WHERE (ip='"
+				+ address.getHostAddress()
+				+ "' AND bantype='IPV4');");
 	}
 
 	public ArrayList<Ban> queryAddressBans(String ip) {
-		return runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (ip='" + ip + "');");
+		return runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (ip='" + ip + "' AND bantype='IPV4');");
 	}
 
-	public boolean queryBanState(ProxiedPlayer p) {
-		return isBanned(runBanQuery("SELECT * FROM `"
-				+ bansTable
-				+ "` WHERE (playerid='"
-				+ p.getUniqueId().toString()
-				+ "');"));
+	public boolean queryBanState(UUID uuid) {
+		return isBanned(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playerid='" + uuid.toString() + "');"));
 	}
 
 	public boolean queryBanState(String name) {
@@ -72,11 +99,19 @@ public class SQLReader {
 				+ bansTable
 				+ "` WHERE (ip='"
 				+ address.getHostAddress()
+				+ "' AND bantype='IPV4');"));
+	}
+
+	public long queryBanLifetime(UUID uuid) {
+		return getLifeTime(runBanQuery("SELECT * FROM `"
+				+ bansTable
+				+ "` WHERE (playerid='"
+				+ uuid.toString()
 				+ "');"));
 	}
 
-	public boolean queryBanState(UUID uuid) {
-		return isBanned(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (playerid='" + uuid.toString() + "');"));
+	public long queryBanLifetime(String name) {
+		return getLifeTime(runBanQuery("SELECT * FROM `" + bansTable + "` WHERE (player='" + name + "');"));
 	}
 
 	public long queryBanLifetime(ProxiedPlayer p) {
@@ -106,10 +141,12 @@ public class SQLReader {
 			ArrayList<Ban> bans = new ArrayList<>();
 			while (rs.next()) {
 				BanType t = BanType.valueOf(rs.getString("bantype"));
-				bans.add(new Ban(rs.getString("playername"), rs.getString("playerid"), InetAddress.getByName(rs.getString("ip")), rs.getString("reason"), t, rs.getString("creator"), rs.getLong("lifetime"), rs.getLong("timestamp"), rs.getBoolean("banned")));
+				bans.add(new Ban(rs.getString("playername"), rs.getString("playerid"), rs.getString("ip"),
+						rs.getString("reason"), t, rs.getString("creator"), rs.getLong("lifetime"),
+						rs.getLong("timestamp"), rs.getBoolean("banned")));
 			}
 			return bans;
-		} catch (SQLException | UnknownHostException e) {
+		} catch (SQLException e) {
 			Snip.debug().debug(getClass(), e);
 			return null;
 		}

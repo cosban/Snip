@@ -13,7 +13,8 @@ public class ConfigurationFile extends UtilFile {
 		if (!ini.hasSection("config")) {
 			ini.addSection("config");
 			ini.addComment("config",
-					"This is the configuration file, read the instructions located at cosban.net for more information\nYou were running Snip v"
+					"This is the configuration file, read the instructions located at cosban.net for more " +
+							"information\nYou were running Snip v"
 							+ Snip.getVersion()
 							+ " when this file was generated");
 			ini.set("config", "debug", "false");

@@ -4,7 +4,6 @@ import net.cosban.snip.Snip;
 import net.cosban.snip.api.Ban;
 import net.cosban.snip.api.Ban.BanType;
 import net.cosban.snip.files.ConfigurationFile;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.net.InetAddress;
 import java.sql.Connection;
@@ -14,6 +13,7 @@ import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.TimerTask;
+import java.util.UUID;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -37,17 +37,17 @@ public class SQLWriter extends TimerTask {
 			c.setAutoCommit(true);
 			// TODO: Table versioning
 			verifyTable(dbm, state, prefix + "bans", "(uid INT UNSIGNED AUTO_INCREMENT NOT NULL,"
-							+ " timestamp BIGINT UNSIGNED NOT NULL,"
-							+ " playername varchar(32) NOT NULL,"
-							+ " playerid varchar(36) NOT NULL,"
-							+ " ip varchar(255) NOT NULL,"
-							+ " creator varchar(32) NOT NULL,"
-							+ " bantype varchar(15) NOT NULL,"
-							+ " lifetime INT UNSIGNED NOT NULL,"
-							+ " reason varchar(255) NOT NULL,"
-							+ " banned TINYINT(1) NOT NULL DEFAULT 0,"
-							+ " updates INT UNSIGNED NOT NULL,"
-							+ " PRIMARY KEY (uid))");
+					+ " timestamp BIGINT UNSIGNED NOT NULL,"
+					+ " playername varchar(32) NOT NULL,"
+					+ " playerid varchar(36) NOT NULL,"
+					+ " ip varchar(255) NOT NULL,"
+					+ " creator varchar(32) NOT NULL,"
+					+ " bantype varchar(15) NOT NULL,"
+					+ " lifetime INT UNSIGNED NOT NULL,"
+					+ " reason varchar(255) NOT NULL,"
+					+ " banned TINYINT(1) NOT NULL DEFAULT 0,"
+					+ " updates INT UNSIGNED NOT NULL,"
+					+ " PRIMARY KEY (uid))");
 			state.close();
 			c.close();
 		} catch (SQLException e) {
@@ -65,32 +65,40 @@ public class SQLWriter extends TimerTask {
 		return manager;
 	}
 
-	public void queueBan(ProxiedPlayer recipient, String creator, String reason) {
-		queue.add(new BanInstanceRow(recipient.getName(), recipient.getUniqueId().toString(), recipient.getAddress().getAddress(), reason, BanType.PERMANENT, creator, 0L, System.currentTimeMillis(), true));
+	public void queueBan(String username, String creator, String reason) {
+		queue.add(new BanRow(username, "", "", reason, BanType.PERMANENT, creator, 0L, System.currentTimeMillis()));
 	}
 
-	public void queueAltBan(ProxiedPlayer recipient, String creator, String reason) {
-		queue.add(new BanInstanceRow(recipient.getName(), recipient.getUniqueId().toString(), recipient.getAddress().getAddress(), reason, BanType.ALTBAN, creator, 0L, System.currentTimeMillis(), true));
+	public void queueBan(String username, String uuid, String address, String reason, String creator) {
+		queue.add(new BanRow(username, uuid, address, reason, BanType.PERMANENT, creator, 0L,
+				System.currentTimeMillis()));
 	}
 
-	public void queueAltBan(ProxiedPlayer recipient, String creator) {
-		queue.add(new BanInstanceRow(recipient.getName(), recipient.getUniqueId().toString(), recipient.getAddress().getAddress(), "", BanType.ALTBAN, creator, 0L, System.currentTimeMillis(), true));
+	public void queueIPBan(InetAddress address, String reason, String sender) {
+		queue.add(new IPBanRow(address, reason, sender, System.currentTimeMillis()));
 	}
 
-	public void queueBan(InetAddress address, String reason, String sender) {
-		queue.add(new BanInstanceRow(address, reason, sender, System.currentTimeMillis(), true));
+	public void queueIPBan(String username, UUID uuid, InetAddress address, String reason, String creator) {
+		queue.add(new IPBanRow(username, uuid.toString(), address, reason, creator, System.currentTimeMillis()));
 	}
 
-	public void queueTempBan(ProxiedPlayer recipient, String creator, long lifetime, String reason) {
-		queue.add(new BanInstanceRow(recipient.getName(), recipient.getUniqueId().toString(), recipient.getAddress().getAddress(), reason, BanType.TEMPORARY, creator, lifetime, System.currentTimeMillis(), true));
+	public void queueAltBan(String username, String uuid, String address, String reason, String creator) {
+		queue.add(new BanRow(username, uuid, address, reason, BanType.ALTBAN, creator, 0L,
+				System.currentTimeMillis()));
+	}
+
+	public void queueTempBan(String username, String uuid, String address, String reason, String creator,
+			long duration) {
+		queue.add(new BanRow(username, uuid, address, reason, BanType.TEMPORARY, creator, duration,
+				System.currentTimeMillis()));
 	}
 
 	public void queueUnban(String name, String creator) {
-		queue.add(new BanInstanceRow(name, "", null, creator, false));
+		queue.add(new BanRow(name, "", null, creator));
 	}
 
-	public void queueUnban(InetAddress address, String sender) {
-		queue.add(new BanInstanceRow(address, "", sender, System.currentTimeMillis(), false));
+	public void queueIPUnban(InetAddress address, String sender) {
+		queue.add(new IPBanRow(address, sender));
 	}
 
 	@Override
@@ -158,34 +166,37 @@ public class SQLWriter extends TimerTask {
 		String getUpdateStatement();
 	}
 
-	private class BanInstanceRow extends Ban implements Row {
-
+	private class IPBanRow extends Ban implements Row {
 		private boolean toInsert;
 
-		public BanInstanceRow(InetAddress address, String reason, String creator, long creationtime, boolean banned) {
-			super(address, reason, creator, creationtime, banned);
-			this.toInsert = banned;
+		public IPBanRow(String username, String uuid, InetAddress address, String reason, String creator,
+				long creation) {
+			super(username, uuid, address.getHostAddress(), reason, BanType.IPV4, creator, 0L, creation, true);
+			toInsert = true;
 		}
 
-		public BanInstanceRow(String player, String uuid, InetAddress address, String reason, BanType type,
-				String creator, long bantime, long creationtime, boolean banned) {
-			super(player, uuid, address, reason, type, creator, bantime, creationtime, banned);
+		public IPBanRow(InetAddress address, String reason, String creator, long creationtime) {
+			super(address.getHostAddress(), reason, creator, creationtime, true);
 			this.toInsert = true;
 		}
 
-		public BanInstanceRow(String player, String uuid, InetAddress address, String creator, boolean banned) {
-			super(player, uuid, address, "Banned by: "
-					+ creator
-					+ " for breaking the rules", BanType.UNBAN, creator, 0L, 0, banned);
-			this.toInsert = false;
+		public IPBanRow(InetAddress address, String creator) {
+			super(address.getHostAddress(), "", creator, 0L, false);
+			toInsert = false;
+		}
+
+		public boolean toInsert() {
+			return toInsert;
 		}
 
 		@Override
 		public String getInsertStatement() {
 			return "INSERT INTO `"
 					+ table
-					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned, updates) VALUES ("
-					+ this.getBanCreationTime()
+					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned, "
+					+
+					"updates) VALUES ("
+					+ this.getCreationTime()
 					+ ", '"
 					+ this.getPlayerName()
 					+ "', '"
@@ -197,7 +208,63 @@ public class SQLWriter extends TimerTask {
 					+ "', '"
 					+ this.getType()
 					+ "', "
-					+ this.getBanTime()
+					+ this.getDuration()
+					+ ", '"
+					+ this.getReason()
+					+ "', "
+					+ this.isBanned()
+					+ ", 0);";
+		}
+
+		public String getUpdateStatement() {
+			return "UPDATE `"
+					+ table
+					+ "` SET banned ="
+					+ isBanned()
+					+ " WHERE (ip='"
+					+ getAddress().getHostAddress()
+					+ "' AND bantype='IPV4');";
+		}
+
+		private final String table = prefix + "bans";
+
+	}
+
+	private class BanRow extends Ban implements Row {
+
+		private boolean toInsert;
+
+		public BanRow(String username, String uuid, String address, String reason, BanType type, String creator,
+				long duration, long creation) {
+			super(username, uuid, address, reason, type, creator, duration, creation, true);
+			toInsert = true;
+		}
+
+		public BanRow(String player, String uuid, String address, String creator) {
+			super(player, uuid, address, "", BanType.UNBAN, creator, 0L, 0L, false);
+			this.toInsert = false;
+		}
+
+		@Override
+		public String getInsertStatement() {
+			return "INSERT INTO `"
+					+ table
+					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned, "
+					+
+					"updates) VALUES ("
+					+ this.getCreationTime()
+					+ ", '"
+					+ this.getPlayerName()
+					+ "', '"
+					+ this.getUUID()
+					+ "', '"
+					+ this.getAddress().getHostAddress()
+					+ "', '"
+					+ this.getCreator()
+					+ "', '"
+					+ this.getType()
+					+ "', "
+					+ this.getDuration()
 					+ ", '"
 					+ this.getReason()
 					+ "', "
@@ -216,6 +283,5 @@ public class SQLWriter extends TimerTask {
 		}
 
 		private final String table = prefix + "bans";
-
 	}
 }

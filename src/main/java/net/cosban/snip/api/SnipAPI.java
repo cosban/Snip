@@ -5,15 +5,12 @@ import net.cosban.snip.events.KickEvent;
 import net.cosban.snip.events.UnbanEvent;
 import net.cosban.snip.sql.SQLReader;
 import net.cosban.snip.sql.SQLWriter;
-import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -23,18 +20,6 @@ public class SnipAPI {
 	private static SQLWriter writer = Snip.getWriter();
 
 	/**
-	 * Check if a player is banned from the server.
-	 *
-	 * @param player
-	 * 		ProxiedPlayer
-	 *
-	 * @return True if the player is banned
-	 */
-	public static boolean isbanned(ProxiedPlayer player) {
-		return Snip.isConnected() && reader.queryBanState(player);
-	}
-
-	/**
 	 * Check if a player is banned from the server by name.
 	 *
 	 * @param name
@@ -42,7 +27,7 @@ public class SnipAPI {
 	 *
 	 * @return True if the player is banned
 	 */
-	public static boolean isbanned(String name) {
+	public static boolean isBanned(String name) {
 		return Snip.isConnected() && reader.queryBanState(name);
 	}
 
@@ -54,7 +39,7 @@ public class SnipAPI {
 	 *
 	 * @return True if the player is banned
 	 */
-	public static boolean isbanned(UUID uuid) {
+	public static boolean isBanned(UUID uuid) {
 		return Snip.isConnected() && reader.queryBanState(uuid);
 	}
 
@@ -62,305 +47,345 @@ public class SnipAPI {
 	 * Check if an address is banned from the server.
 	 *
 	 * @param address
-	 * 		Inet address in texual representative form
+	 * 		Inet address in textual representative form
 	 *
 	 * @return True if address is banned
 	 */
-	public static boolean isbanned(InetAddress address) {
+	public static boolean isBanned(InetAddress address) {
 		return Snip.isConnected() && reader.queryBanState(address);
 	}
 
 	/**
-	 * Ban a player and kick them if they are on the server.
-	 *
-	 * @param player
-	 * 		ProxiedPlayer to (kick)ban
-	 *
-	 * @return True if the ban was set successfully.
-	 */
-	public static void ban(ProxiedPlayer player, CommandSender sender) {
-		ban(player.getName(), sender);
-	}
-
-	/**
-	 * Ban a player with a reason and kick them if they are on the server.
-	 *
-	 * @param player
-	 * 		ProxiedPlayer to (kick)ban
+	 * @param username
+	 * 		The player to temporarily banIP
+	 * @param uuid
+	 * 		The UUID of the player in string form
+	 * @param address
+	 * 		Address to banIP in textual representation.
 	 * @param reason
-	 * 		The ban reason (and kick reason if the player is online)
-	 *
-	 * @return True if the ban was set successfully.
+	 * 		The banIP reason (and kick reason if the player is online)
+	 * @param sender
+	 * 		The name of the command initiator
 	 */
-	public static void ban(ProxiedPlayer player, final String reason, CommandSender sender) {
-		ban(player.getName(), reason, sender);
-	}
-
-	/**
-	 * Ban a player and kick them if they are on the server.
-	 *
-	 * @param name
-	 * 		ProxiedPlayer to (kick)ban by name
-	 *
-	 * @return True if the ban was set successfully.
-	 */
-	public static void ban(String name, final CommandSender sender) {
-		ban(name, "breaking the rules", sender);
-	}
-
-	/**
-	 * Ban a player with a reason and kick them if they are on the server.
-	 *
-	 * @param name
-	 * 		ProxiedPlayer to (kick)ban by name
-	 * @param reason
-	 * 		The ban reason (and kick reason if the player is online)
-	 *
-	 * @return True if the ban was set successfully.
-	 */
-	public static void ban(String name, final String reason, final CommandSender sender) {
+	public static void ban(String username, String uuid, String address, String reason, String sender) {
 		if (Snip.isConnected()) {
-			writer.queueBan(ProxyServer.getInstance().getPlayer(name), sender.getName(), reason);
+			Snip.getWriter().queueBan(username, uuid, address, reason, sender);
 		}
+	}
+
+	/**
+	 * @param username
+	 * 		The player to temporarily banIP
+	 * @param uuid
+	 * 		The UUID of the player in string form
+	 * @param address
+	 * 		Address to banIP in textual representation.
+	 * @param sender
+	 * 		The name of the command initiator
+	 */
+	public static void ban(String username, String uuid, String address, String sender) {
+		ban(username, uuid, address, "Banned by " + sender + " for breaking the rules.", sender);
+	}
+
+	/**
+	 * @param username
+	 * 		The player to temporarily banIP
+	 * @param reason
+	 * 		The banIP reason (and kick reason if the player is online)
+	 * @param sender
+	 * 		The name of the command initiator
+	 */
+	public static void ban(String username, String reason, String sender) {
+		ban(username, "", "", reason, sender);
+	}
+
+	/**
+	 * @param username
+	 * 		The player to temporarily banIP
+	 * @param sender
+	 * 		The name of the command initiator
+	 */
+	public static void ban(String username, String sender) {
+		ban(username, "", "", "Banned by " + sender + " for breaking the rules.", sender);
 	}
 
 	/**
 	 * Ban an IP address and kick any users connecting from that address if they are on the server.
 	 *
 	 * @param address
-	 * 		Address to ban in textual representation.
+	 * 		Address to banIP in textual representation.
 	 *
-	 * @return True if the ban was set successfully.
+	 * @return True if the banIP was set successfully.
 	 */
-	public static void ban(InetAddress address, CommandSender sender) {
-		ban(address, "Banned by: " + sender.getName() + " for breaking the rules.", sender);
+	public static void banIP(InetAddress address, final String sender) {
+		banIP(address, "Banned by: " + sender + " for breaking the rules.", sender);
 	}
 
 	/**
 	 * Ban an IP address with a reason and kick any users connecting from that address if they are on the server.
 	 *
 	 * @param address
-	 * 		Address to (kick)ban in textual representation.
+	 * 		Address to (kick)banIP in textual representation.
 	 * @param reason
-	 * 		The ban reason (and kick reason if the player is online)
-	 *
-	 * @return True if the ban was set successfully.
+	 * 		The banIP reason (and kick reason if the player is online)
+	 * @param sender
+	 * 		The name of the command initiator
 	 */
-	public static void ban(InetAddress address, final String reason, CommandSender sender) {
+	public static void banIP(InetAddress address, final String reason, final String sender) {
 		if (Snip.isConnected()) {
-			writer.queueBan(address, reason, sender.getName());
+			writer.queueIPBan(address, reason, sender);
 		}
 	}
 
-	// TODO: import from csv
-	// public static boolean importban(String name, final String reason, final
-	// CommandSender sender, final long timestamp) {
-	// return false;
-	// }
+	public static void banIP(String username, UUID uuid, InetAddress address, final String reason,
+			final String creator) {
+		if (Snip.isConnected()) {
+			writer.queueIPBan(username, uuid, address, reason, creator);
+		}
+	}
+
+	/**
+	 * Bans the main account and any other alternate accounts which may try to log in. This is more severe than an IP
+	 * banIP due to the fact that it works much like a Kill On Site (KOS) order for any alts and may span out.
+	 *
+	 * @param username
+	 * 		The player to temporarily banIP.
+	 * @param uuid
+	 * 		The UUID of the player in string form
+	 * @param address
+	 * 		The ip addres of the player
+	 * @param reason
+	 * 		The reason for the banIP.
+	 * @param sender
+	 * 		The name of the command initiator
+	 */
+	public static void banAlts(String username, String uuid, String address, final String reason,
+			final String sender) {
+		if (Snip.isConnected()) {
+			writer.queueAltBan(username, uuid, address, reason, sender);
+		}
+	}
+
+	/**
+	 * @param username
+	 * 		The player to temporarily banIP.
+	 * @param reason
+	 * 		The reason for the banIP.
+	 * @param sender
+	 * 		The name of the command initiator
+	 */
+	public static void banAlts(String username, final String reason, final String sender) {
+		banAlts(username, "", "", reason, sender);
+	}
+
+	/**
+	 * @param username
+	 * 		The player to temporarily banIP.
+	 * @param sender
+	 * 		The name of the command initiator
+	 */
+	public static void banAlts(String username, final String sender) {
+		banAlts(username, "", sender);
+	}
 
 	/**
 	 * Unban a player from the server (both permanent and temporary bans)
 	 *
 	 * @param name
 	 * 		The name of the player to unban.
-	 *
-	 * @return True if the player was successfully unbanned.
+	 * @param sender
+	 * 		The name of the command initiator
 	 */
-	public static void unban(String name, CommandSender sender) {
+	public static void unban(String name, final String sender) {
 		ProxyServer.getInstance().getPluginManager().callEvent(new UnbanEvent(name, sender));
 		if (Snip.isConnected()) {
-			writer.queueUnban(name, sender.getName());
+			writer.queueUnban(name, sender);
 		}
 	}
 
 	/**
-	 * Unban an address from the server (both permanent and temporary bans).
+	 * Unban an address from the server.
 	 *
 	 * @param address
 	 * 		The address to unban in textual representation.
-	 *
-	 * @return True if the address was successfully unbanned.
+	 * @param sender
+	 * 		The name of the command initiator
 	 */
-	public static void unban(InetAddress address, CommandSender sender) {
-		// TODO: should this be here?
+	public static void unban(InetAddress address, final String sender) {
 		ProxyServer.getInstance().getPluginManager().callEvent(new UnbanEvent(address.getHostAddress(), sender));
 		if (Snip.isConnected()) {
-			writer.queueUnban(address, sender.getName());
+			writer.queueIPUnban(address, sender);
 		}
 	}
 
 	/**
-	 * Temporarily ban a player for an amount of time.
-	 *
-	 * @param player
-	 * 		The player to ban.
-	 * @param seconds
-	 * 		How long to ban the player for. (in seconds)
-	 *
-	 * @return If the player was successfully temp banned.
-	 */
-	public static void tempban(ProxiedPlayer player, long seconds, CommandSender sender) {
-		tempban(player.getName(), seconds, sender);
-	}
-
-	/**
-	 * Temporarily ban a player for an amount of time.
+	 * Temporarily bans a player
 	 *
 	 * @param name
-	 * 		The player to ban by name.
-	 * @param seconds
-	 * 		How long to ban the player for. (in seconds)
-	 *
-	 * @return If the player was successfully temp banned.
+	 * 		The player to banIP by name.
+	 * @param sender
+	 * 		The name of the command initiator
+	 * @param duration
+	 * 		How long to banIP the player for. (in seconds)
 	 */
-	public static void tempban(String name, long seconds, final CommandSender sender) {
-		tempban(name, "", seconds, sender);
+	public static void tempban(String name, final String sender, final long duration) {
+		tempban(name, "", "", "", sender, duration);
 	}
 
 	/**
-	 * Temporarily ban an address for an amount of time.
+	 * Temporarily bans a player
 	 *
-	 * @param address
-	 * 		The address to ban in textual representation.
-	 * @param seconds
-	 * 		How long to ban the address for. (in seconds)
-	 *
-	 * @return If the address was successfully temp banned.
-	 */
-	public static void tempban(InetAddress address, long seconds, CommandSender sender) {
-		tempban(address.getHostAddress(), seconds, sender);
-	}
-
-	/**
-	 * Temporarily ban a player for a reason.
-	 *
-	 * @param player
-	 * 		The player to temporarily ban.
+	 * @param name
+	 * 		The player to banIP by name.
 	 * @param reason
-	 * 		The reason for the ban.
-	 * @param seconds
-	 * 		How long to ban the player for. (in seconds)
-	 *
-	 * @return If the player was successfully banned.
+	 * 		The reason for the banIP.
+	 * @param sender
+	 * 		The name of the command initiator
+	 * @param duration
+	 * 		How long to banIP the player for. (in seconds)
 	 */
-	public static void tempban(ProxiedPlayer player, final String reason, long seconds, String sender) {
+	public static void tempban(String name, String reason, final String sender, final long duration) {
+		tempban(name, "", "", reason, sender, duration);
+	}
+
+	/**
+	 * @param username
+	 * 		The player to temporarily banIP.
+	 * @param uuid
+	 * 		The UUID of the player in string form
+	 * @param address
+	 * 		The ip addres of the player
+	 * @param reason
+	 * 		The reason for the banIP.
+	 * @param sender
+	 * 		The name of the command initiator
+	 * @param duration
+	 * 		How long to banIP the player for. (in seconds)
+	 */
+	public static void tempban(String username, String uuid, String address, final String reason, final String sender,
+			final long duration) {
 		if (Snip.isConnected()) {
-			writer.queueTempBan(player, sender, seconds, reason);
+			writer.queueTempBan(username, uuid, address, reason, sender, duration);
+		}
+	}
+
+	public static void kickPlayer(String username, final String sender) {
+		kickPlayer(ProxyServer.getInstance().getPlayer(username), sender);
+	}
+
+	public static void kickPlayer(String username, String reason, final String sender) {
+		kickPlayer(ProxyServer.getInstance().getPlayer(username), reason, sender);
+	}
+
+	/**
+	 * Kick a player from the server.
+	 *
+	 * @param player
+	 * 		The player to kick.
+	 */
+	public static void kickPlayer(ProxiedPlayer player, final String sender) {
+		kickPlayer(player, "Kicked by: " + sender, sender);
+	}
+
+	/**
+	 * Kick a player from the server.
+	 *
+	 * @param player
+	 * 		The player to kick.
+	 * @param reason
+	 * 		The reason to kick with.
+	 */
+	public static void kickPlayer(ProxiedPlayer player, String reason, final String sender) {
+		ProxyServer.getInstance().getPluginManager().callEvent(new KickEvent(player.getName(), sender, reason));
+		logger.info((SnipAPI.isBanned(player.getUniqueId()) ? "[KICK/BAN] " : "[KICK] ")
+				+ player.getName()
+				+ " - Invoker: "
+				+ sender
+				+ " - Reason:"
+				+ reason);
+		player.disconnect(new TextComponent(reason));
+	}
+
+	/**
+	 * Get the time remaining on a temporary banIP.
+	 *
+	 * @param username
+	 * 		The name of the player in question.
+	 *
+	 * @return The number of seconds left until the banIP expires. If not banned, return 0. If banIP is permanent,
+	 * return -1.
+	 */
+	public static long getRemainingBanTime(String username) {
+		if (isBanned(username)) {
+			if (isTemporary(username)) {
+				return getRemainingBanTime(username);
+			} else {
+				return -1L;
+			}
+		} else {
+			return 0L;
 		}
 	}
 
 	/**
-	 * Temporarily ban a player for a reason.
+	 * Check if a banIP is temporary.
 	 *
 	 * @param name
-	 * 		The player to temporarily ban.
-	 * @param reason
-	 * 		The reason for the ban.
-	 * @param seconds
-	 * 		How long to ban the player for. (in seconds)
+	 * 		The name of the player that is banned.
 	 *
-	 * @return If the player was successfully banned.
+	 * @return True if banIP is temporary. Otherwise false.
 	 */
-	public static void tempban(String name, final String reason, long seconds, final CommandSender sender) {
-		tempban(ProxyServer.getInstance().getPlayer(name), sender.getName(), seconds, reason);
-	}
-
-	/**
-	 * Temporarily ban an address for a reason.
-	 *
-	 * @param address
-	 * 		The address to temporarily ban in textual representation.
-	 * @param reason
-	 * 		The reason for the ban.
-	 * @param seconds
-	 * 		How long to ban the address for. (in seconds)
-	 *
-	 * @return If the address was successfully banned.
-	 */
-	public static void tempban(InetAddress address, final String reason, long seconds, CommandSender sender) {
-		tempban(address.getHostAddress(), reason, seconds, sender);
-	}
-
-	public static void altBan(ProxiedPlayer player, final String reason, String sender) {
-		if (Snip.isConnected()) {
-			writer.queueAltBan(player, reason, sender);
+	public static boolean isTemporary(String name) {
+		if (!Snip.isConnected()) return false;
+		Ban last = reader.queryLastBan(name);
+		if (last == null) {
+			return false;
 		}
-	}
-
-	public static void altBan(String name, final String reason, String sender) {
-		altBan(ProxyServer.getInstance().getPlayer(name), reason, sender);
-	}
-
-	public static void altBan(String name, final String reason, CommandSender sender) {
-		altBan(ProxyServer.getInstance().getPlayer(name), reason, sender.getName());
-	}
-
-	public static void altBan(String name, CommandSender sender) {
-		altBan(name, "", sender.getName());
+		return last.isTemporary();
 	}
 
 	/**
-	 * Get the creator of the ban on a player.
+	 * Check if a banIP is temporary.
 	 *
-	 * @param player
-	 * 		The banned player to look up.
+	 * @param uuid
+	 * 		The uuid of the player that is banned.
 	 *
-	 * @return The name of the creator of the ban. If not banned, return null. If banned by a non-player return SERVER.
+	 * @return True if banIP is temporary. Otherwise false.
 	 */
-	public static String getCreator(ProxiedPlayer player) {
-		return reader.queryLastBan(player).getCreator();
+	public static boolean isTemporary(UUID uuid) {
+		Ban last = reader.queryLastBan(uuid);
+		if (last == null) {
+			return false;
+		}
+		return last.isTemporary();
 	}
 
 	/**
-	 * Get the creator of the last ban on a player.
+	 * Get the reason for the last banIP.
 	 *
-	 * @param name
-	 * 		The banned player to look up.
-	 *
-	 * @return The name of the creator of the ban. If not banned, return null. If banned by a non-player return SERVER.
-	 */
-	public static String getCreator(String name) {
-		return getCreator(ProxyServer.getInstance().getPlayer(name));
-	}
-
-	/**
-	 * Get the creator of the last ban on a player.
-	 *
-	 * @param address
-	 * 		The banned player to look up.
-	 *
-	 * @return The name of the creator of the ban. If not banned, return null. If banned by a non-player return SERVER.
-	 */
-	public static String getCreator(InetAddress address) {
-		return getCreator(address.getHostAddress());
-	}
-
-	/**
-	 * Get the reason for the last ban.
-	 *
-	 * @param player
-	 * 		The player in question.
+	 * @param username
+	 * 		The username of the player in question.
 	 *
 	 * @return The reason the requested player was banned for. If not banned, return null.
 	 */
-	public static String getBanReason(ProxiedPlayer player) {
-		return reader.queryLastBan(player).getReason();
+	public static String getBanReason(String username) {
+		return reader.queryLastBan(username).getReason();
 	}
 
 	/**
-	 * Get the reason for the last ban.
+	 * Get the reason for the last banIP.
 	 *
-	 * @param name
-	 * 		The player in question.
+	 * @param uuid
+	 * 		The uuid of the player in question.
 	 *
 	 * @return The reason the requested player was banned for. If not banned, return null.
 	 */
-	public static String getBanReason(String name) {
-		return getBanReason(ProxyServer.getInstance().getPlayer(name));
+	public static String getBanReason(UUID uuid) {
+		return reader.queryLastBan(uuid).getReason();
 	}
 
 	/**
-	 * Get the reason for the last ban.
+	 * Get the reason for the last banIP.
 	 *
 	 * @param address
 	 * 		The address in question.
@@ -372,183 +397,64 @@ public class SnipAPI {
 	}
 
 	/**
-	 * Get the time remaining on a temporary ban.
-	 *
-	 * @param player
-	 * 		The player in question.
-	 *
-	 * @return The number of seconds left until the ban expires. If not banned, return 0. If ban is permanent, return
-	 * -1.
-	 */
-	public static long getRemainingBanTime(ProxiedPlayer player) {
-		return getRemainingBanTime(player.getName());
-	}
-
-	/**
-	 * Get the time remaining on a temporary ban.
+	 * Get the sender of the last banIP on a player.
 	 *
 	 * @param name
-	 * 		The player in question.
+	 * 		The username of the banned player to look up.
 	 *
-	 * @return The number of seconds left until the ban expires. If not banned, return 0. If ban is permanent, return
-	 * -1.
+	 * @return The name of the sender of the banIP. If not banned, return null. If banned by a non-player return
+	 * SERVER.
 	 */
-	public static long getRemainingBanTime(String name) {
-		return reader.queryLastBan(ProxyServer.getInstance().getPlayer(name)).getRemainingBanTime();
+	public static String getCreator(String name) {
+		return reader.queryLastBan(name).getCreator();
 	}
 
 	/**
-	 * Get the time remaining on a temporary ban.
+	 * Get the sender of the last banIP on a player.
+	 *
+	 * @param uuid
+	 * 		The uuid of the banned player to look up.
+	 *
+	 * @return The name of the sender of the banIP. If not banned, return null. If banned by a non-player return
+	 * SERVER.
+	 */
+	public static String getCreator(UUID uuid) {
+		return reader.queryLastBan(uuid).getCreator();
+	}
+
+	/**
+	 * Get the sender of the last banIP on a player.
 	 *
 	 * @param address
-	 * 		The address in question.
+	 * 		The banned player to look up.
 	 *
-	 * @return The number of seconds left until the ban expires. If not banned, return 0. If ban is permanent, return
-	 * -1.
+	 * @return The name of the sender of the banIP. If not banned, return null. If banned by a non-player return
+	 * SERVER.
 	 */
-	public static long getRemainingBanTime(InetAddress address) {
-		return getRemainingBanTime(address.getHostAddress());
+	public static String getCreator(InetAddress address) {
+		return getCreator(address.getHostAddress());
 	}
 
 	/**
-	 * Check if a ban is temporary.
-	 *
-	 * @param name
-	 * 		The name of the player that is banned.
-	 *
-	 * @return True if ban is temporary. Otherwise false.
-	 */
-	public static boolean isTemporary(String name) {
-		return isTemporary(ProxyServer.getInstance().getPlayer(name));
-	}
-
-	/**
-	 * Check if a ban is temporary.
-	 *
-	 * @param player
-	 * 		The name of the player that is banned.
-	 *
-	 * @return True if ban is temporary. Otherwise false.
-	 */
-	public static boolean isTemporary(ProxiedPlayer player) {
-		return reader.queryLastBan(player).isTemporary();
-	}
-
-	/**
-	 * Check if a ban is temporary.
-	 *
-	 * @param address
-	 * 		The address that is banned.
-	 *
-	 * @return True if ban is temporary. Otherwise false.
-	 */
-	public static boolean isTemporary(InetAddress address) {
-		return isTemporary(address.getHostAddress());
-	}
-
-	/**
-	 * Get a set of all ban keys.
-	 *
-	 * @return A set of all bans.
-	 */
-	public static Set<String> getBans() {
-		// return jedis.keys("*");
-		return null;
-	}
-
-	/**
-	 * Duplicate the keys method
-	 *
 	 * @return A set of all matches.
 	 */
-	public static ArrayList<Ban> bannedIPs(String ip) {
+	public static ArrayList<Ban> getMatchingIPBans(String ip) {
 		return reader.queryAddressBans(ip);
 	}
 
-	/**
-	 * Get the time the last ban was created in unix time format. (Milliseconds since 1 Jan 1970).
-	 *
-	 * @param name
-	 * 		The name of the banned player.
-	 *
-	 * @return The milliseconds the ban was made in unix time.
-	 */
-	public static long getTimeCreated(String name) {
-		return getTimeCreated(ProxyServer.getInstance().getPlayer(name));
-	}
-
-	/**
-	 * Get the time a ban was created in unix time format. (Milliseconds since 1 Jan, 1970).
-	 *
-	 * @param player
-	 * 		The banned player.
-	 *
-	 * @return The milliseconds the ban was made in unix time.
-	 */
-	public static long getTimeCreated(ProxiedPlayer player) {
-		return reader.queryLastBan(player).getBanCreationTime();
-	}
-
-	/**
-	 * Get the time a ban was created in unix time format. (Milliseconds since 1 Jan, 1970).
-	 *
-	 * @param address
-	 * 		The banned address.
-	 *
-	 * @return The milliseconds the ban was made in unix time.
-	 */
-	public static long getTimeCreated(InetAddress address) {
-		return getTimeCreated(address.getHostAddress());
-	}
-
-	/**
-	 * Get the details of a ban hashkey.
-	 *
-	 * @param name
-	 * 		The banned name to retrieve details for.
-	 *
-	 * @return A map of key:values.
-	 */
-	public static Map<String, String> getBanDetails(String name) {
-		return null;
-		// return jedis.hgetAll(name.toLowerCase());
-	}
-
-	/**
-	 * Kick a player from the server with a reason.
-	 *
-	 * @param player
-	 * 		The player to kick.
-	 * @param reason
-	 * 		The reason to kick with.
-	 */
-	public static void kickPlayer(ProxiedPlayer player, String reason, CommandSender sender) {
-		ProxyServer.getInstance().getPluginManager().callEvent(new KickEvent(player, sender, reason));
-		logger.info((SnipAPI.isbanned(player) ? "[KICK/BAN] " : "[KICK] ")
-				+ player.getName()
-				+ " - Invoker: "
-				+ sender.getName()
-				+ " - Reason: \""
-				+ reason
-				+ "\"");
-		player.disconnect(new TextComponent(reason));
-	}
-
-	/**
-	 * Kick a player from the server.
-	 *
-	 * @param player
-	 * 		The player to kick.
-	 */
-	public static void kickPlayer(ProxiedPlayer player, CommandSender sender) {
-		kickPlayer(player, "Kicked by: " + sender.getName(), sender);
-	}
-
-	public static void kickPlayer(String username, CommandSender sender) {
-		kickPlayer(ProxyServer.getInstance().getPlayer(username), sender);
-	}
-
-	public static void kickPlayer(String username, String reason, CommandSender sender) {
-		kickPlayer(ProxyServer.getInstance().getPlayer(username), reason, sender);
+	public static Ban getLatestBan(String username, UUID uuid, InetAddress address) {
+		ArrayList<Ban> bans = new ArrayList<>();
+		bans.add(reader.queryLastBan(username));
+		bans.add(reader.queryLastBan(uuid));
+		bans.add(reader.queryLastBan(address));
+		Ban latest = null;
+		for (Ban b : bans) {
+			if(b!= null) {
+				if (latest == null || latest.getCreationTime() < b.getCreationTime()) {
+					latest = b;
+				}
+			}
+		}
+		return latest;
 	}
 }

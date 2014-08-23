@@ -25,46 +25,30 @@ public class BanCommand extends SnipCommand {
 	}
 
 	public void execute(CommandSender sender, String[] args) {
-		ProxiedPlayer player;
 		if (args.length < 1) {
 			sender.sendMessage(new TextComponent(ChatColor.RED + getSyntax()));
-		} else if (args.length == 1) {
-			if (!args[0].matches("[_A-Za-z0-9]{1,16}")) {
-				sender.sendMessage(new TextComponent(new TextComponent(ChatColor.RED
-						+ "Invalid player name specified (1-16 chars of 'A-Za-z0-9_')")));
-				return;
-			}
-			if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
-				SnipAPI.ban(player, sender);
-				player.disconnect(new TextComponent("Banned by: " + sender.getName() + " for breaking the rules."));
-				sender.sendMessage(new TextComponent(ChatColor.GREEN + player.getName() + " has been banned."));
-			} else if (!SnipAPI.isbanned(args[0].toLowerCase())) {
-				SnipAPI.ban(args[0], sender);
-				sender.sendMessage(new TextComponent(ChatColor.GREEN + args[0] + " has been banned."));
-			} else {
-				sender.sendMessage(new TextComponent(ChatColor.RED + args[0] + " is already banned!"));
-			}
-		} else if (args.length >= 2) {
-			if (!args[0].matches("[_A-Za-z0-9]{1,16}")) {
-				sender.sendMessage(new TextComponent(ChatColor.RED
-						+ "Invalid player name specified (1-16 chars of 'A-Za-z0-9_')"));
-				return;
-			}
-
-			String message = "";
-			for (int i = 1; i < args.length; i++)
-				message = message + args[i] + " ";
-			message = message.trim();
-			if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
-				SnipAPI.ban(player, message, sender);
-				SnipAPI.kickPlayer(player, "Banned: " + message, sender);
-				sender.sendMessage(new TextComponent(ChatColor.GREEN + player.getName() + " has been banned."));
-			} else if (!SnipAPI.isbanned(args[0].toLowerCase())) {
-				SnipAPI.ban(args[0], message, sender);
-				sender.sendMessage(new TextComponent(ChatColor.GREEN + args[0] + " has been banned."));
-			} else {
-				sender.sendMessage(new TextComponent(ChatColor.RED + args[0] + " is already banned!"));
-			}
+			return;
+		}
+		if (!args[0].matches("[_A-Za-z0-9]{1,16}")) {
+			sender.sendMessage(new TextComponent(new TextComponent(ChatColor.RED
+					+ "Invalid player name specified (1-16 chars of 'A-Za-z0-9_')")));
+			return;
+		}
+		if (SnipAPI.isBanned(args[0])) {
+			sender.sendMessage(new TextComponent(ChatColor.RED + args[0] + " is already banned!"));
+			return;
+		}
+		ProxiedPlayer player;
+		if ((player = ProxyServer.getInstance().getPlayer(args[0])) != null) {
+			SnipAPI.ban(player.getName(), player.getUniqueId().toString(), player.getAddress().getAddress()
+							.getHostAddress(),
+					"Banned: "
+							+ getMessage(args, 1), sender.getName());
+			SnipAPI.kickPlayer(player.getName(), "Banned: " + getMessage(args, 1), sender.getName());
+			sender.sendMessage(new TextComponent(ChatColor.GREEN + player.getName() + " has been banned."));
+		} else if (!SnipAPI.isBanned(args[0].toLowerCase())) {
+			SnipAPI.ban(args[0], "Banned: " + getMessage(args, 1), sender.getName());
+			sender.sendMessage(new TextComponent(ChatColor.GREEN + args[0] + " has been banned."));
 		}
 	}
 }

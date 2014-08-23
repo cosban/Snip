@@ -1,20 +1,17 @@
 package net.cosban.snip.events;
 
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-
 public class KickEvent extends SnipEvent {
-	private ProxiedPlayer player;
-	private CommandSender invoker;
-	private String        reason;
+	private String player;
+	private String creator;
+	private String reason;
 
-	public KickEvent(ProxiedPlayer player, CommandSender invoker, String reason) {
+	public KickEvent(String player, String creator, String reason) {
 		this.player = player;
-		this.invoker = invoker;
+		this.creator = creator;
 		this.reason = reason;
 	}
 
-	public ProxiedPlayer getPlayer() {
+	public String getPlayer() {
 		return player;
 	}
 
@@ -22,7 +19,7 @@ public class KickEvent extends SnipEvent {
 		return reason;
 	}
 
-	public CommandSender getInvoker() {
-		return invoker;
+	public String getInvoker() {
+		return creator;
 	}
 }

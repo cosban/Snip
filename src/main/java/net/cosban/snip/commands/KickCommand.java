@@ -29,71 +29,45 @@ public class KickCommand extends SnipCommand {
 	}
 
 	public void execute(CommandSender sender, String[] args) {
-		if (sender.hasPermission("snip.kick") || !(sender instanceof ProxiedPlayer)) {
-			if (args.length == 1) {
-				ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[0]);
-				if (player != null) {
-					SnipAPI.kickPlayer(player, sender);
-					ProxyServer.getInstance().broadcast(new TextComponent(ChatColor.YELLOW
-							+ player.getName()
-							+ " was kicked from the server."));
-				} else {
-					sender.sendMessage(new TextComponent(ChatColor.RED + "There are no players by that name online!"));
-				}
-			} else if (args.length == 2 && args[0].equalsIgnoreCase("-re")) {
-				List<ProxiedPlayer> matchingPlayers = new ArrayList<ProxiedPlayer>();
-				try {
-					Pattern pattern = Pattern.compile(args[1], Pattern.CASE_INSENSITIVE);
-
-					for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
-						if (pattern.matcher(player.getName()).matches()) {
-							matchingPlayers.add(player);
-						}
+		if (args.length < 1) {
+			sender.sendMessage(new TextComponent(ChatColor.RED + getSyntax()));
+			return;
+		}
+		if (args.length == 2 && args[0].equalsIgnoreCase("-re")) {
+			List<ProxiedPlayer> matchingPlayers = new ArrayList<>();
+			try {
+				Pattern pattern = Pattern.compile(args[1], Pattern.CASE_INSENSITIVE);
+				for (ProxiedPlayer player : ProxyServer.getInstance().getPlayers()) {
+					if (pattern.matcher(player.getName()).matches()) {
+						matchingPlayers.add(player);
 					}
-				} catch (PatternSyntaxException e) {
-					sender.sendMessage(new TextComponent(ChatColor.RED
-							+ "Invalid regular expression: "
-							+ e.getPattern()));
-					return;
 				}
-
-				if (matchingPlayers.size() <= 0) {
-					sender.sendMessage(new TextComponent(ChatColor.GREEN + "No matching players were found."));
-					return;
-				} else {
-					sender.sendMessage(new TextComponent(matchingPlayers.size() + " matching players were found."));
-				}
-
-				for (ProxiedPlayer player : matchingPlayers) {
-					SnipAPI.kickPlayer(player, "RE kick.", sender);
-					ProxyServer.getInstance().broadcast(new TextComponent(ChatColor.YELLOW
-							+ player.getName()
-							+ " was kicked from the server - RE Kick."));
-				}
-				return;
-			} else if (args.length >= 2) {
-				ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[0]);
-				String message = "";
-				for (int i = 1; i < args.length; i++)
-					message += args[i] + " ";
-				message = message.trim();
-				SnipAPI.kickPlayer(player, message, sender);
-				// TODO: from config
-				// ProxyServer.getInstance().broadcast(new
-				// TextComponent(ChatColor.YELLOW
-				// + player.getName()
-				// + " was kicked from the server - "
-				// + message));
-				return;
-			} else {
-				sender.sendMessage(new TextComponent(ChatColor.RED + "Syntax: /kick [-re] <player> [reason]"));
+			} catch (PatternSyntaxException e) {
+				sender.sendMessage(new TextComponent(ChatColor.RED + "Invalid regular expression: " + e.getPattern()));
 				return;
 			}
-		} else {
-			sender.sendMessage(new TextComponent(ChatColor.RED + "You do not have permission for this command!"));
-			SnipAPI.kickPlayer((ProxiedPlayer) sender, ChatColor.DARK_RED
-					+ "YOU DO NOT HAVE PERMISSION FOR THIS COMMAND!", sender);
+
+			if (matchingPlayers.size() <= 0) {
+				sender.sendMessage(new TextComponent(ChatColor.GREEN + "No matching players were found."));
+				return;
+			}
+			for (ProxiedPlayer player : matchingPlayers) {
+				SnipAPI.kickPlayer(player.getName(), "RE kick.", sender.getName());
+				ProxyServer.getInstance().broadcast(new TextComponent(ChatColor.YELLOW
+						+ player.getName()
+						+ " was kicked from the server."));
+			}
 			return;
+		}
+
+		ProxiedPlayer player = ProxyServer.getInstance().getPlayer(args[0]);
+		if (player != null) {
+			SnipAPI.kickPlayer(player.getName(), "KICKED: " + getMessage(args, 1), sender.getName());
+			ProxyServer.getInstance().broadcast(new TextComponent(ChatColor.YELLOW
+					+ player.getName()
+					+ " was kicked from the server."));
+		} else {
+			sender.sendMessage(new TextComponent(ChatColor.RED + "There are no players by that name online!"));
 		}
 	}
 }
