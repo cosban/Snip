@@ -31,7 +31,7 @@ public class LookupCommand extends SnipCommand {
 		if (!SnipAPI.isBanned(args[0])) {
 			sender.sendMessage(new TextComponent(ChatColor.GREEN + args[0] + " IS NOT BANNED!"));
 		} else {
-			if (SnipAPI.isTemporary(args[0])) {
+			if (SnipAPI.getLastBan(args[0]).isTemporary()) {
 				sender.sendMessage(new TextComponent(ChatColor.GREEN + args[0] + " IS TEMPORARILY BANNED FOR " +
 						TimeUtils.getDurationBreakdown(SnipAPI.getRemainingBanTime(args[0]))));
 			} else {

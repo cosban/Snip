@@ -82,8 +82,8 @@ public class SQLWriter extends TimerTask {
 		queue.add(new IPBanRow(username, uuid.toString(), address, reason, creator, System.currentTimeMillis()));
 	}
 
-	public void queueAltBan(String username, String uuid, String address, String reason, String creator) {
-		queue.add(new BanRow(username, uuid, address, reason, BanType.ALTBAN, creator, 0L,
+	public void queueAltBan(String username, UUID uuid, InetAddress address, String reason, String creator) {
+		queue.add(new BanRow(username, uuid.toString(), address.toString(), reason, BanType.ALTBAN, creator, 0L,
 				System.currentTimeMillis()));
 	}
 
@@ -194,8 +194,7 @@ public class SQLWriter extends TimerTask {
 			return "INSERT INTO `"
 					+ table
 					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned, "
-					+
-					"updates) VALUES ("
+					+ "updates) VALUES ("
 					+ this.getCreationTime()
 					+ ", '"
 					+ this.getPlayerName()
@@ -249,9 +248,9 @@ public class SQLWriter extends TimerTask {
 		public String getInsertStatement() {
 			return "INSERT INTO `"
 					+ table
-					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned, "
+					+ "` (timestamp, playername, playerid, ip, creator, bantype, lifetime, reason, banned,updates) "
 					+
-					"updates) VALUES ("
+					"VALUES ("
 					+ this.getCreationTime()
 					+ ", '"
 					+ this.getPlayerName()

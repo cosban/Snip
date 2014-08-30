@@ -13,8 +13,8 @@ public class ConnectionListener implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
 	public void onPlayerLogin(PostLoginEvent event) {
 		if (SnipAPI.isBanned(event.getPlayer().getUniqueId())) {
-			if (SnipAPI.isTemporary(event.getPlayer().getUniqueId())
-					|| SnipAPI.isTemporary(event.getPlayer().getName())) {
+			if (SnipAPI.getLastBan(event.getPlayer().getUniqueId()).isTemporary()
+					|| SnipAPI.getLastBan(event.getPlayer().getName()).isTemporary()) {
 				ProxyServer.getInstance().getPluginManager().callEvent(new PlayerJoinEvent(event.getPlayer(),
 						PlayerJoinEvent.Result.TEMPBANNED));
 			} else {

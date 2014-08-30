@@ -48,15 +48,12 @@ public class SnipCommand extends Command {
 				_import(sender);
 			} else {
 				sender.sendMessage(new TextComponent(ChatColor.RED + "Invalid Snip command!"));
-				return;
 			}
 		} else {
 			sender.sendMessage(new TextComponent(ChatColor.RED + "You do not have permission for this command!"));
 			SnipAPI.kickPlayer(sender.getName(), ChatColor.DARK_RED
 					+ "YOU DO NOT HAVE PERMISSION FOR THIS COMMAND!", sender.getName());
-			return;
 		}
-		return;
 	}
 
 	public void status(CommandSender sender) {
@@ -68,7 +65,7 @@ public class SnipCommand extends Command {
 
 	private void info(CommandSender sender) {
 		sender.sendMessage(new TextComponent(ChatColor.GREEN + "Running Snip v" + Snip.getVersion()));
-		return;
+
 	}
 
 	private void size(CommandSender sender) {

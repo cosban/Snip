@@ -159,33 +159,11 @@ public class SnipAPI {
 	 * @param sender
 	 * 		The name of the command initiator
 	 */
-	public static void banAlts(String username, String uuid, String address, final String reason,
+	public static void banAlts(String username, UUID uuid, InetAddress address, final String reason,
 			final String sender) {
 		if (Snip.isConnected()) {
 			writer.queueAltBan(username, uuid, address, reason, sender);
 		}
-	}
-
-	/**
-	 * @param username
-	 * 		The player to temporarily banIP.
-	 * @param reason
-	 * 		The reason for the banIP.
-	 * @param sender
-	 * 		The name of the command initiator
-	 */
-	public static void banAlts(String username, final String reason, final String sender) {
-		banAlts(username, "", "", reason, sender);
-	}
-
-	/**
-	 * @param username
-	 * 		The player to temporarily banIP.
-	 * @param sender
-	 * 		The name of the command initiator
-	 */
-	public static void banAlts(String username, final String sender) {
-		banAlts(username, "", sender);
 	}
 
 	/**
@@ -270,7 +248,7 @@ public class SnipAPI {
 	}
 
 	public static void kickPlayer(String username, final String sender) {
-		kickPlayer(ProxyServer.getInstance().getPlayer(username), sender);
+		kickPlayer(username, "Kicked by: " + sender, sender);
 	}
 
 	public static void kickPlayer(String username, String reason, final String sender) {
@@ -317,7 +295,8 @@ public class SnipAPI {
 	 */
 	public static long getRemainingBanTime(String username) {
 		if (isBanned(username)) {
-			if (isTemporary(username)) {
+			if (getLastBan(username).isTemporary()) {
+				//TODO: endless recursion is bad
 				return getRemainingBanTime(username);
 			} else {
 				return -1L;
@@ -328,111 +307,37 @@ public class SnipAPI {
 	}
 
 	/**
-	 * Check if a banIP is temporary.
+	 * Get the time remaining on a temporary banIP.
 	 *
-	 * @param name
-	 * 		The name of the player that is banned.
+	 * @param uuid
+	 * 		The name of the player in question.
 	 *
-	 * @return True if banIP is temporary. Otherwise false.
+	 * @return The number of seconds left until the banIP expires. If not banned, return 0. If banIP is permanent,
+	 * return -1.
 	 */
-	public static boolean isTemporary(String name) {
-		if (!Snip.isConnected()) return false;
-		Ban last = reader.queryLastBan(name);
-		if (last == null) {
-			return false;
+	public static long getRemainingBanTime(UUID uuid) {
+		if (isBanned(uuid)) {
+			if (getLastBan(uuid).isTemporary()) {
+				//TODO: endless recursion loop
+				return getRemainingBanTime(uuid);
+			} else {
+				return -1L;
+			}
+		} else {
+			return 0L;
 		}
-		return last.isTemporary();
 	}
 
-	/**
-	 * Check if a banIP is temporary.
-	 *
-	 * @param uuid
-	 * 		The uuid of the player that is banned.
-	 *
-	 * @return True if banIP is temporary. Otherwise false.
-	 */
-	public static boolean isTemporary(UUID uuid) {
-		Ban last = reader.queryLastBan(uuid);
-		if (last == null) {
-			return false;
-		}
-		return last.isTemporary();
+	public static Ban getLastBan(String username) {
+		return reader.queryLastBan(username);
 	}
 
-	/**
-	 * Get the reason for the last banIP.
-	 *
-	 * @param username
-	 * 		The username of the player in question.
-	 *
-	 * @return The reason the requested player was banned for. If not banned, return null.
-	 */
-	public static String getBanReason(String username) {
-		return reader.queryLastBan(username).getReason();
+	public static Ban getLastBan(UUID uuid) {
+		return reader.queryLastBan(uuid);
 	}
 
-	/**
-	 * Get the reason for the last banIP.
-	 *
-	 * @param uuid
-	 * 		The uuid of the player in question.
-	 *
-	 * @return The reason the requested player was banned for. If not banned, return null.
-	 */
-	public static String getBanReason(UUID uuid) {
-		return reader.queryLastBan(uuid).getReason();
-	}
-
-	/**
-	 * Get the reason for the last banIP.
-	 *
-	 * @param address
-	 * 		The address in question.
-	 *
-	 * @return The reason the requested address was banned for. If not banned, return null.
-	 */
-	public static String getBanReason(InetAddress address) {
-		return getBanReason(address.getHostAddress());
-	}
-
-	/**
-	 * Get the sender of the last banIP on a player.
-	 *
-	 * @param name
-	 * 		The username of the banned player to look up.
-	 *
-	 * @return The name of the sender of the banIP. If not banned, return null. If banned by a non-player return
-	 * SERVER.
-	 */
-	public static String getCreator(String name) {
-		return reader.queryLastBan(name).getCreator();
-	}
-
-	/**
-	 * Get the sender of the last banIP on a player.
-	 *
-	 * @param uuid
-	 * 		The uuid of the banned player to look up.
-	 *
-	 * @return The name of the sender of the banIP. If not banned, return null. If banned by a non-player return
-	 * SERVER.
-	 */
-	public static String getCreator(UUID uuid) {
-		return reader.queryLastBan(uuid).getCreator();
-	}
-
-	/**
-	 * Get the sender of the last banIP on a player.
-	 *
-	 * @param address
-	 * 		The banned player to look up.
-	 *
-	 * @return The name of the sender of the banIP. If not banned, return null. If banned by a non-player return
-	 * SERVER.
-	 */
-	public static String getCreator(InetAddress address) {
-		return getCreator(address.getHostAddress());
+	public static Ban getLastBan(InetAddress address) {
+		return reader.queryLastBan(address);
 	}
 
 	/**
@@ -449,7 +354,7 @@ public class SnipAPI {
 		bans.add(reader.queryLastBan(address));
 		Ban latest = null;
 		for (Ban b : bans) {
-			if(b!= null) {
+			if (b != null) {
 				if (latest == null || latest.getCreationTime() < b.getCreationTime()) {
 					latest = b;
 				}
