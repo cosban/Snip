@@ -3,7 +3,6 @@ package net.cosban.snip;
 import net.cosban.snip.commands.SnipCommand;
 import net.cosban.snip.files.ConfigurationFile;
 import net.cosban.snip.listeners.ConnectionListener;
-import net.cosban.snip.listeners.SnipListener;
 import net.cosban.snip.sql.SQLReader;
 import net.cosban.snip.sql.SQLWriter;
 import net.cosban.utils.Debugger;
@@ -96,7 +95,6 @@ public class Snip extends Plugin {
 
 		registerCommands();
 
-		getProxy().getPluginManager().registerListener(this, new SnipListener());
 		getProxy().getPluginManager().registerListener(this, new ConnectionListener());
 
 		connect();
